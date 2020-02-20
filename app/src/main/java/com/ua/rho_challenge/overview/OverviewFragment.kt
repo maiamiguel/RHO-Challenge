@@ -4,9 +4,11 @@ import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ua.rho_challenge.R
 import com.ua.rho_challenge.databinding.FragmentOverviewBinding
+import kotlinx.android.synthetic.main.fragment_overview.*
 
 /**
  * This fragment shows the the status of the list of tweets consumed through the Twitter Streaming API.
