@@ -70,7 +70,6 @@ dependencies {
     implementation 'oauth.signpost:signpost-core:1.2.1.2'
 
     implementation 'com.google.code.gson:gson:2.8.5'
-    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
 
     implementation 'junit:junit:4.12'
@@ -87,4 +86,17 @@ dependencies {
     //Okhttp3
     implementation "com.squareup.okhttp3:okhttp:4.1.0"
     implementation 'com.squareup.okhttp3:logging-interceptor:3.11.0'
+
+
+    // Rx-Retrofit Call Adapter
+    implementation "com.squareup.retrofit2:adapter-rxjava2:$rxcalladapter_version"
+
+    // RxAndroid
+    implementation "io.reactivex.rxjava2:rxandroid:$rxandroid_version"
+
+    // RxJava
+    implementation "io.reactivex.rxjava2:rxjava:$rxjava_version"
+
+    // Reactive Streams (convert Observable to LiveData)
+    implementation "android.arch.lifecycle:reactivestreams:$reactivestreams_version"
 }

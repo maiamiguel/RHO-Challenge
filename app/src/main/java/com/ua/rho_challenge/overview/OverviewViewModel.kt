@@ -43,26 +43,32 @@ class OverviewViewModel : ViewModel() {
     // the Coroutine runs using the Main (UI) dispatcher
     private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Main)
 
-    /**
-     * Call getStreamData() on init so data can  be displayed ASAP.
-     */
     init {
-        getStreamData()
+        getStreamData("teste")
     }
 
-    private fun getStreamData() {
+    fun searchStream(str : String){
+        Log.d("debug", "Search Parameter - $str")
+        //getStreamData(str)
+    }
+
+    private fun getStreamData(track: String) {
         coroutineScope.launch {
             // Get the Deferred object for our Retrofit request
-            var twitterCall = ApiService().api!!.getTweetList("teste")
+            var twitterCall = ApiService().api!!.getTweetList(track)
             _status.value = DataApiStatus.LOADING
 
             try {
                 // this will run on a thread managed by Retrofit
                 var listResult = twitterCall.await()
+                _status.value = DataApiStatus.DONE
 
-//                while (!listResult.source().exhausted()){
-//                    Log.d("debug", "Here: " + listResult.source().readUtf8Line())
-//                }
+                // https://stackoverflow.com/questions/41788507/how-do-i-consume-twitter-streaming-api-in-android-using-okhttp3
+                while (!listResult.source().exhausted()){
+                    Log.d("debug", "Here: " + listResult.source().readUtf8Line())
+                }
+
+                Log.d("debug", "out of while")
 
                 val reader = JsonReader(
                     InputStreamReader(listResult.byteStream())
@@ -72,7 +78,6 @@ class OverviewViewModel : ViewModel() {
                 var j = gson.fromJson<JsonObject>(reader, JsonObject::class.java)
                 //val text = j.get("text").getAsString()
 
-                //_text.value = text
                 Log.d("debug", j.toString())
 
                 var t = Tweet.fromJsonObject(j)
@@ -82,7 +87,7 @@ class OverviewViewModel : ViewModel() {
                 _tweetsList.value = tweetsList
 
                 Log.d("debug", tweetsList.toString())
-                _status.value = DataApiStatus.DONE
+
 
             } catch (e: Exception) {
                 Log.d("debug", "Error!! $e")

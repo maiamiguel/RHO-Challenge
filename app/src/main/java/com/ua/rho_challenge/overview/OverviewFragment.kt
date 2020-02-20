@@ -2,15 +2,18 @@ package com.ua.rho_challenge.overview
 
 import android.os.Bundle
 import android.view.*
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import com.ua.rho_challenge.R
 import com.ua.rho_challenge.databinding.FragmentOverviewBinding
 
 /**
  * This fragment shows the the status of the list of tweets consumed through the Twitter Streaming API.
  */
-class OverviewFragment : Fragment() {
+class OverviewFragment : Fragment(), SearchView.OnQueryTextListener {
 
+    private lateinit var searchView: SearchView
     /**
      * Lazily initialize our [OverviewViewModel].
      */
@@ -34,6 +37,33 @@ class OverviewFragment : Fragment() {
         // Sets the adapter of the tweetList RecyclerView
         binding.tweetList.adapter = TweetsAdapter()
 
+        setHasOptionsMenu(true)
         return binding.root
+    }
+
+    /**
+     * Inflates the search menu.
+     */
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.search_menu, menu)
+
+        val searchItem = menu.findItem(R.id.action_search)
+        searchView = searchItem.actionView as SearchView
+        searchView.setOnQueryTextListener(this)
+
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onQueryTextSubmit(query: String?): Boolean {
+        if (!query.isNullOrBlank() or !query.isNullOrEmpty()){
+            //searchView.clearFocus();
+            query?.let { viewModel.searchStream(it) }
+
+        }
+        return true
+    }
+
+    override fun onQueryTextChange(newText: String?): Boolean {
+        return false
     }
 }
