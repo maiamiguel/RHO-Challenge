@@ -39,7 +39,7 @@ class TweetsAdapter : ListAdapter<Tweet, TweetsAdapter.TweetsViewHolder>(DiffCal
         }
 
         override fun areContentsTheSame(oldItem: Tweet, newItem: Tweet): Boolean {
-            return oldItem.idStr == newItem.idStr
+            return oldItem.text.equals(newItem.text)
         }
     }
 

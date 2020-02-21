@@ -35,38 +35,50 @@ class OverviewViewModel : ViewModel() {
 
     // Create a Coroutine scope using a job to be able to cancel when needed
     private var viewModelJob = Job()
-
-    // the Coroutine runs using the Main (UI) dispatcher
+    
     private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.IO)
 
     init {
-        testeStreamData("teste")
+        getStreamData("teste")
     }
 
-    fun testeStreamData(str: String){
-        GlobalScope.launch {
+    fun getStreamData(str: String) {
+        coroutineScope.launch {
+            //            withContext(Dispatchers.Main) {
+//                _status.value = DataApiStatus.LOADING
+//            }
             try {
                 val listResult = ApiService().api!!.getTweetList(str).await()
-                withContext(Dispatchers.Main) {
+
+                while (!listResult.source().exhausted()) {
+                    Log.d("debug", listResult.byteStream().toString())
+                    //_status.value = DataApiStatus.LOADING
                     val reader = JsonReader(
                         InputStreamReader(listResult.byteStream())
                     )
                     val gson = GsonBuilder().create()
 
-                    var j = gson.fromJson<JsonObject>(reader, JsonObject::class.java)
+                    val j = gson.fromJson<JsonObject>(reader, JsonObject::class.java)
                     //val text = j.get("text").getAsString()
 
                     Log.d("debug", "JSON: " + j.toString())
+                    //while (true) {
+                    val t = Tweet.fromJsonObject(j)
 
-                    var t = Tweet.fromJsonObject(j)
-
-                    // https://stackoverflow.com/questions/47941537/notify-observer-when-item-is-added-to-list-of-livedata
+                    withContext(Dispatchers.Main) {
+                        //_status.value = DataApiStatus.DONE
+                        // https://stackoverflow.com/questions/47941537/notify-observer-when-item-is-added-to-list-of-livedata
                         tweetsList.add(t)
+                        //tweetsList.add(t)
                         _tweetsList.value = tweetsList
+                        // }
+                    }
+
+                    Log.d("debug", "END")
                 }
-            }
-            catch (e: Exception) {
-                withContext(Dispatchers.IO) {
+            } catch (e: Exception) {
+                Log.d("debug", "ERROR ${e.message}")
+                withContext(Dispatchers.Main) {
                     _status.value = DataApiStatus.ERROR
                 }
             }
@@ -78,39 +90,11 @@ class OverviewViewModel : ViewModel() {
         //getStreamData(str)
     }
 
-    private fun getStreamData(track: String) {
-        coroutineScope.launch {
-            // Get the Deferred object for our Retrofit request
-            var listResult = ApiService().api!!.getTweetList(track).await()
-            //_status.value = DataApiStatus.LOADING
-
-            try {
-                _status.value = DataApiStatus.LOADING
-                // this will run on a thread managed by Retrofit
-                _status.value = DataApiStatus.DONE
-
-                while (!listResult.source().exhausted()) {
-                    //Log.d("debug", "Here: " + listResult.source().readUtf8Line())
-                    val reader = JsonReader(
-                        InputStreamReader(listResult.byteStream())
-                    )
-                    val gson = GsonBuilder().create()
-
-                    var j = gson.fromJson<JsonObject>(reader, JsonObject::class.java)
-                    //val text = j.get("text").getAsString()
-
-                    Log.d("debug", "JSON: " + j.toString())
-
-                    var t = Tweet.fromJsonObject(j)
-
-                    // https://stackoverflow.com/questions/47941537/notify-observer-when-item-is-added-to-list-of-livedata
-                    withContext(Dispatchers.Main){
-                        tweetsList.add(t)
-                        _tweetsList.value = tweetsList
-                    }
-
-                    Log.d("debug", "Tweets size ${tweetsList.size}")
-                }
+    override fun onCleared() {
+        super.onCleared()
+        viewModelJob.cancel()
+    }
+}
 
 //                twitterCall.subscribeOn(Schedulers.io())
 //                    .observeOn(AndroidSchedulers.mainThread())
@@ -141,18 +125,3 @@ class OverviewViewModel : ViewModel() {
 //                        },
 //                        { error -> Log.e("ERROR", error.message) }
 //                    )
-            } catch (e: Exception) {
-                Log.d("debug", "Error!! $e")
-                withContext(Dispatchers.Main){
-                    _status.value = DataApiStatus.ERROR
-                    _tweetsList.value = ArrayList()
-                }
-            }
-        }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        viewModelJob.cancel()
-    }
-}
