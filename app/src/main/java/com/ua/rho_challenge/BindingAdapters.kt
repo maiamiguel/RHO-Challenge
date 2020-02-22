@@ -4,21 +4,9 @@ import android.view.View
 import android.widget.ImageView
 import androidx.core.net.toUri
 import androidx.databinding.BindingAdapter
-import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import com.ua.rho_challenge.network.Tweet
 import com.ua.rho_challenge.overview.DataApiStatus
-import com.ua.rho_challenge.overview.TweetsAdapter
-
-/**
- * When there is no Tweets data (data is null), hide the [RecyclerView], otherwise show it.
- */
-@BindingAdapter("listData")
-fun bindRecyclerView(recyclerView: RecyclerView, data: List<Tweet>?) {
-    val adapter = recyclerView.adapter as TweetsAdapter
-    adapter.submitList(data)
-}
 
 /**
  * Uses the Glide library to load an image by URL into an [ImageView]

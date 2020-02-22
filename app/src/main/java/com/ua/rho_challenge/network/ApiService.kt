@@ -31,8 +31,7 @@ class ApiService() {
             .build()
 
         /**
-         * Use the Retrofit builder to build a retrofit object using a Moshi converter with our Moshi
-         * object.
+         * Use the Retrofit builder to build a retrofit object using CoroutineCallAdapterFactory to support Kotlin Coroutines.
          */
         var retrofit = retrofit2.Retrofit.Builder()
             .baseUrl(BASE_URL)

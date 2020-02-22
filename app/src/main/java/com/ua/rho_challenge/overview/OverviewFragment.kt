@@ -2,20 +2,22 @@ package com.ua.rho_challenge.overview
 
 import android.os.Bundle
 import android.view.*
+import androidx.annotation.Nullable
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ua.rho_challenge.R
 import com.ua.rho_challenge.databinding.FragmentOverviewBinding
-import kotlinx.android.synthetic.main.fragment_overview.*
+import com.ua.rho_challenge.network.Tweet
 
 /**
- * This fragment shows the the status of the list of tweets consumed through the Twitter Streaming API.
+ * This fragment shows the list of tweets consumed through the Twitter Streaming API.
  */
 class OverviewFragment : Fragment(), SearchView.OnQueryTextListener {
 
     private lateinit var searchView: SearchView
+
     /**
      * Lazily initialize our [OverviewViewModel].
      */
@@ -27,7 +29,11 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener {
      * Inflates the layout with Data Binding, sets its lifecycle owner to the OverviewFragment
      * to enable Data Binding to observe LiveData, and sets up the RecyclerView with an adapter.
      */
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         val binding = FragmentOverviewBinding.inflate(inflater)
 
         // Allows Data Binding to Observe LiveData with the lifecycle of this Fragment
@@ -36,12 +42,18 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener {
         // Giving the binding access to the OverviewViewModel
         binding.viewModel = viewModel
 
-        binding.button.setOnClickListener {
-            viewModel.getStreamData("teste")
-        }
-
         // Sets the adapter of the tweetList RecyclerView
-        binding.tweetList.adapter = TweetsAdapter()
+        val adapter = TweetsAdapter()
+
+        binding.tweetList.adapter = adapter
+
+        viewModel.properties.observe(
+            this,
+            object : Observer<ArrayList<Tweet>> {
+                override fun onChanged(t: ArrayList<Tweet>?) {
+                    t?.let { adapter.setEmployeeList(it) }
+                }
+            })
 
         setHasOptionsMenu(true)
         return binding.root
@@ -61,8 +73,8 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener {
     }
 
     override fun onQueryTextSubmit(query: String?): Boolean {
-        if (!query.isNullOrBlank() or !query.isNullOrEmpty()){
-            //searchView.clearFocus();
+        if (!query.isNullOrBlank() or !query.isNullOrEmpty()) {
+            searchView.clearFocus();
             query?.let { viewModel.searchStream(it) }
 
         }

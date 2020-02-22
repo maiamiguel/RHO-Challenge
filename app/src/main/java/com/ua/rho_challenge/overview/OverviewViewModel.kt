@@ -18,39 +18,36 @@ enum class DataApiStatus { LOADING, ERROR, DONE }
  * The [ViewModel] that is attached to the [OverviewFragment].
  */
 class OverviewViewModel : ViewModel() {
-    // Internally, we use a MutableLiveData, because we will be updating the List of MarsProperty with new values
+    // Internally, we use a MutableLiveData, because we will be updating the List of Tweets with new values
     // The external LiveData interface to the property is immutable, so only this class can modify
+
     val properties: LiveData<ArrayList<Tweet>>
         get() = _tweetsList
 
     private val tweetsList = ArrayList<Tweet>()
+    // The internal MutableLiveData that stores the list of tweets
     private val _tweetsList = MutableLiveData<ArrayList<Tweet>>()
 
     // The internal MutableLiveData that stores the status of the request
     private val _status = MutableLiveData<DataApiStatus>()
-
     // The external immutable LiveData for the request status
     val status: LiveData<DataApiStatus>
         get() = _status
 
     // Create a Coroutine scope using a job to be able to cancel when needed
     private var viewModelJob = Job()
-    
-    private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.IO)
 
-    init {
-        //getStreamData("teste")
-    }
+    private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Default)
 
     fun getStreamData(str: String) {
         coroutineScope.launch {
-            //            withContext(Dispatchers.Main) {
-//                _status.value = DataApiStatus.LOADING
-//            }
+            withContext(Dispatchers.Main) {
+                _status.value = DataApiStatus.LOADING
+            }
             try {
                 val listResult = ApiService().api!!.getTweetList(str).await()
 
-                //while (!listResult.source().exhausted()) {
+                while (!listResult.source().exhausted()) {
                     Log.d("debug", listResult.byteStream().toString())
                     //_status.value = DataApiStatus.LOADING
                     val reader = JsonReader(
@@ -66,18 +63,17 @@ class OverviewViewModel : ViewModel() {
                     val t = Tweet.fromJsonObject(j)
 
                     withContext(Dispatchers.Main) {
-                        //_status.value = DataApiStatus.DONE
+                        _status.value = DataApiStatus.DONE
                         // https://stackoverflow.com/questions/47941537/notify-observer-when-item-is-added-to-list-of-livedata
                         tweetsList.add(t)
-                        //tweetsList.add(t)
                         _tweetsList.value = tweetsList
-                        // }
                     }
+                }
 
-                    Log.d("debug", "END")
-                //}
+                Log.d("debug", "END")
+
             } catch (e: Exception) {
-                Log.d("debug", "ERROR ${e.message}")
+                Log.e("error", "ERROR ${e.message}")
                 withContext(Dispatchers.Main) {
                     _status.value = DataApiStatus.ERROR
                 }
@@ -87,41 +83,12 @@ class OverviewViewModel : ViewModel() {
 
     fun searchStream(str: String) {
         Log.d("debug", "Search Parameter - $str")
-        //getStreamData(str)
+        getStreamData(str)
     }
 
     override fun onCleared() {
+        Log.d("debug", "onCleared")
         super.onCleared()
         viewModelJob.cancel()
     }
 }
-
-//                twitterCall.subscribeOn(Schedulers.io())
-//                    .observeOn(AndroidSchedulers.mainThread())
-//                    .subscribe(
-//                        { result ->
-//                            while (!result.source().exhausted()) {
-//                                //Log.d("debug", "Here: " + result.source().readUtf8Line())
-//                                val reader = JsonReader(
-//                                    InputStreamReader(result.byteStream())
-//                                )
-//                                val gson = GsonBuilder().create()
-//
-//                                var j = gson.fromJson<JsonObject>(reader, JsonObject::class.java)
-//                                //val text = j.get("text").getAsString()
-//
-//                                //Log.d("debug", "JSON: " + j.toString())
-//
-//                                var t = Tweet.fromJsonObject(j)
-//
-//                                _text.value = t.userName
-//
-//                                // https://stackoverflow.com/questions/47941537/notify-observer-when-item-is-added-to-list-of-livedata
-//                                tweetsList.add(t)
-//                                _tweetsList.value = tweetsList
-//
-//                                Log.d("debug", "Tweets size ${tweetsList.size}")
-//                            }
-//                        },
-//                        { error -> Log.e("ERROR", error.message) }
-//                    )

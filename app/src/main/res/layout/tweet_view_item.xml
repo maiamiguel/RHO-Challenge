@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="property"
+            type="com.ua.rho_challenge.network.Tweet" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardViewTweet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="5dp"
+            android:elevation="3dp"
+            card_view:cardCornerRadius="1dp">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/profileImage"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/profile_pic"
+                    android:scaleType="fitXY"
+                    app:profileImageUrl="@{property.profileImgUrl}"
+                    bind:layout_constraintBottom_toBottomOf="parent"
+                    bind:layout_constraintStart_toStartOf="parent"
+                    bind:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tweetUsername"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/profileImage"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:padding="4dp"
+                    android:text="@{property.userName}"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="18sp"
+                    bind:layout_constraintEnd_toEndOf="parent"
+                    bind:layout_constraintStart_toEndOf="@+id/profileImage"
+                    bind:layout_constraintTop_toTopOf="parent"
+                    tools:text="Morris" />
+
+                <TextView
+                    android:id="@+id/tweet"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/tweetUsername"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="8dp"
+                    android:padding="4dp"
+                    android:text="@{property.text}"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="16sp"
+                    bind:layout_constraintEnd_toEndOf="parent"
+                    bind:layout_constraintStart_toEndOf="@+id/profileImage"
+                    bind:layout_constraintTop_toBottomOf="@+id/tweetUsername"
+                    tools:text="Texto do Tweet" />
+
+                <TextView
+                    android:id="@+id/date"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="4dp"
+                    android:padding="4dp"
+                    android:text="@{property.createdAt}"
+                    android:textAlignment="viewEnd"
+                    bind:layout_constraintBottom_toBottomOf="parent"
+                    bind:layout_constraintEnd_toEndOf="parent"
+                    bind:layout_constraintStart_toEndOf="@+id/profileImage"
+                    bind:layout_constraintTop_toBottomOf="@+id/tweet"
+                    tools:text="Data do tweet" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+    </LinearLayout>
+</layout>
