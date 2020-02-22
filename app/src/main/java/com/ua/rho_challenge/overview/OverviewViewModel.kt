@@ -39,7 +39,7 @@ class OverviewViewModel : ViewModel() {
     private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.IO)
 
     init {
-        getStreamData("teste")
+        //getStreamData("teste")
     }
 
     fun getStreamData(str: String) {
@@ -50,7 +50,7 @@ class OverviewViewModel : ViewModel() {
             try {
                 val listResult = ApiService().api!!.getTweetList(str).await()
 
-                while (!listResult.source().exhausted()) {
+                //while (!listResult.source().exhausted()) {
                     Log.d("debug", listResult.byteStream().toString())
                     //_status.value = DataApiStatus.LOADING
                     val reader = JsonReader(
@@ -75,7 +75,7 @@ class OverviewViewModel : ViewModel() {
                     }
 
                     Log.d("debug", "END")
-                }
+                //}
             } catch (e: Exception) {
                 Log.d("debug", "ERROR ${e.message}")
                 withContext(Dispatchers.Main) {

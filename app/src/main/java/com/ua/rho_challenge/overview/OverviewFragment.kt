@@ -36,6 +36,10 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener {
         // Giving the binding access to the OverviewViewModel
         binding.viewModel = viewModel
 
+        binding.button.setOnClickListener {
+            viewModel.getStreamData("teste")
+        }
+
         // Sets the adapter of the tweetList RecyclerView
         binding.tweetList.adapter = TweetsAdapter()
 
