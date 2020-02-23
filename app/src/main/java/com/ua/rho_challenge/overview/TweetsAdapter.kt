@@ -13,7 +13,7 @@ import com.ua.rho_challenge.network.Tweet
  */
 class TweetsAdapter : RecyclerView.Adapter<TweetsAdapter.TweetViewHolder?>() {
 
-    private var tweets: ArrayList<Tweet>? = null
+    private var tweets: ArrayList<Tweet> = ArrayList()
 
     override fun onCreateViewHolder(
         viewGroup: ViewGroup,
@@ -30,16 +30,12 @@ class TweetsAdapter : RecyclerView.Adapter<TweetsAdapter.TweetViewHolder?>() {
         employeeViewHolder: TweetViewHolder,
         i: Int
     ) {
-        val currentStudent: Tweet = tweets!!.get(i)
+        val currentStudent: Tweet = tweets.get(i)
         employeeViewHolder.tweetsListItemBinding.property = currentStudent
     }
 
     override fun getItemCount(): Int {
-        return if (tweets != null) {
-            tweets!!.size
-        } else {
-            0
-        }
+        return if (tweets.isEmpty()) 0 else tweets.size
     }
 
     fun setEmployeeList(employees: ArrayList<Tweet>) {

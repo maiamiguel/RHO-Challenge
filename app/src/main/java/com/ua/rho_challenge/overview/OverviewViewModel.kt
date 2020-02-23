@@ -1,5 +1,7 @@
 package com.ua.rho_challenge.overview
 
+import android.content.Context
+import android.net.ConnectivityManager
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -11,6 +13,7 @@ import com.ua.rho_challenge.network.Tweet
 import com.ua.rho_challenge.network.network.ApiService
 import kotlinx.coroutines.*
 import java.io.InputStreamReader
+
 
 enum class DataApiStatus { LOADING, ERROR, DONE }
 
@@ -75,7 +78,7 @@ class OverviewViewModel : ViewModel() {
             } catch (e: Exception) {
                 Log.e("error", "ERROR ${e.message}")
                 withContext(Dispatchers.Main) {
-                    _status.value = DataApiStatus.ERROR
+                   // _status.value = DataApiStatus.ERROR
                 }
             }
         }

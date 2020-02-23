@@ -1,9 +1,12 @@
 package com.ua.rho_challenge
 
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.core.net.toUri
 import androidx.databinding.BindingAdapter
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.ua.rho_challenge.overview.DataApiStatus
@@ -46,4 +49,33 @@ fun bindStatus(statusImageView: ImageView, status: DataApiStatus?) {
             statusImageView.visibility = View.GONE
         }
     }
+}
+
+
+/**
+ * This binding adapter displays the [DataApiStatus] of the network request in an image view.  When
+ * the request is loading, it displays a loading_animation.  If the request has an error, it
+ * displays a broken image to reflect the connection error.  When the request is finished, it
+ * hides the image view.
+ */
+@BindingAdapter("apiStatusRecycler")
+fun bindStatusRecycler(rv: RecyclerView, status: DataApiStatus?) {
+    when (status) {
+        DataApiStatus.LOADING -> {
+            rv.visibility = View.INVISIBLE
+        }
+        DataApiStatus.ERROR -> {
+            rv.visibility = View.GONE
+        }
+        DataApiStatus.DONE -> {
+            rv.visibility = View.VISIBLE
+        }
+    }
+}
+
+@BindingAdapter("dateFormatted")
+fun transformDate(tv : TextView, data : String) {
+    val splited = data.split(" ")
+    val s = "${splited[3]} - ${splited[2]} ${splited[1]} ${splited[5]}"
+    tv.text = s
 }
