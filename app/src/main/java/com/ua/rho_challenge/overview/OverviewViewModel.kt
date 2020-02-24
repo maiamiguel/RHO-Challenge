@@ -1,7 +1,5 @@
 package com.ua.rho_challenge.overview
 
-import android.content.Context
-import android.net.ConnectivityManager
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -13,7 +11,6 @@ import com.ua.rho_challenge.network.Tweet
 import com.ua.rho_challenge.network.network.ApiService
 import kotlinx.coroutines.*
 import java.io.InputStreamReader
-
 
 enum class DataApiStatus { LOADING, ERROR, DONE }
 
@@ -45,24 +42,18 @@ class OverviewViewModel : ViewModel() {
     fun getStreamData(str: String) {
         coroutineScope.launch {
             withContext(Dispatchers.Main) {
+                //Display loading animation in UI
                 _status.value = DataApiStatus.LOADING
             }
             try {
                 val listResult = ApiService().api!!.getTweetList(str).await()
 
                 while (!listResult.source().exhausted()) {
-                    Log.d("debug", listResult.byteStream().toString())
-                    //_status.value = DataApiStatus.LOADING
-                    val reader = JsonReader(
-                        InputStreamReader(listResult.byteStream())
-                    )
+                    val reader = JsonReader( InputStreamReader(listResult.byteStream()) )
                     val gson = GsonBuilder().create()
-
                     val j = gson.fromJson<JsonObject>(reader, JsonObject::class.java)
-                    //val text = j.get("text").getAsString()
-
                     Log.d("debug", "JSON: " + j.toString())
-                    //while (true) {
+
                     val t = Tweet.fromJsonObject(j)
 
                     withContext(Dispatchers.Main) {
@@ -72,21 +63,19 @@ class OverviewViewModel : ViewModel() {
                         _tweetsList.value = tweetsList
                     }
                 }
-
-                Log.d("debug", "END")
-
             } catch (e: Exception) {
                 Log.e("error", "ERROR ${e.message}")
-                withContext(Dispatchers.Main) {
-                   // _status.value = DataApiStatus.ERROR
-                }
             }
         }
     }
 
     fun searchStream(str: String) {
-        Log.d("debug", "Search Parameter - $str")
+        Log.d("debug", "Search parameter to stream - $str")
         getStreamData(str)
+    }
+
+    fun unavailableInternetConnection(){
+        _status.value = DataApiStatus.ERROR
     }
 
     override fun onCleared() {

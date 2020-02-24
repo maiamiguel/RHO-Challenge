@@ -1,7 +1,11 @@
 package com.ua.rho_challenge.overview
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -10,16 +14,15 @@ import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.ua.rho_challenge.R
 import com.ua.rho_challenge.databinding.FragmentOverviewBinding
 import com.ua.rho_challenge.network.Tweet
-
 
 /**
  * This fragment shows the list of tweets consumed through the Twitter Streaming API.
  */
 class OverviewFragment : Fragment(), SearchView.OnQueryTextListener {
-
     private lateinit var searchView: SearchView
 
     /**
@@ -64,21 +67,27 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener {
                 }
             })
 
+        if (!context?.let { isNetworkAvailable(it) }!!){
+            viewModel.unavailableInternetConnection()
+        }
+
         setHasOptionsMenu(true)
         return binding.root
     }
 
     fun isNetworkAvailable(context: Context): Boolean {
-        val connectivityManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val connection = connectivityManager.activeNetworkInfo != null && connectivityManager.activeNetworkInfo.isConnected
-        if (connection){
-            Log.d("debug","true")
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork: NetworkInfo? = cm.activeNetworkInfo
+        val isConnected: Boolean = activeNetwork?.isConnectedOrConnecting == true
+
+        if (!isConnected) {
+            Log.d("debug", "Device is not connected!")
+            displayToast(getString(R.string.no_connection))
         }
         else{
-            Log.d("debug","false")
+            Log.d("debug", "Device is connected!")
         }
-        return connection
+        return isConnected
     }
 
     /**
@@ -95,22 +104,24 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener {
     }
 
     override fun onQueryTextSubmit(query: String?): Boolean {
-        this!!.context?.let { isNetworkAvailable(it) }
-        if (!query.isNullOrBlank() or !query.isNullOrEmpty()) {
-            searchView.clearFocus();
-            displayToast("Search started..")
-            query?.let { viewModel.searchStream(it) }
+        if (context?.let { isNetworkAvailable(it) }!!){
+            if (!query.isNullOrBlank() or !query.isNullOrEmpty()) {
+                searchView.clearFocus();
+                displayToast(getString(R.string.start_search))
+                query?.let { viewModel.searchStream(it) }
 
+            }
+            return true
         }
-        return true
+        return false
+    }
+
+    override fun onQueryTextChange(newText: String?): Boolean {
+        return false
     }
 
     fun displayToast(msg: String) {
         val t = Toast.makeText(context, msg, Toast.LENGTH_LONG)
         t.show()
-    }
-
-    override fun onQueryTextChange(newText: String?): Boolean {
-        return false
     }
 }

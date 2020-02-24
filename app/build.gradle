@@ -29,6 +29,10 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
+    // Snackbar
+
+    implementation "com.google.android.material:material:1.1.0"
+
     // Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$version_kotlin"
 
@@ -76,6 +80,9 @@ dependencies {
 
     // Object Mapper
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.8.0'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.8.5'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.8.5'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.8.5'
 
 
 }
