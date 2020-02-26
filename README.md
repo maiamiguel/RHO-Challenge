@@ -1,4 +1,4 @@
-# Twitter-RHO-Android_Challenge
+# Twitter Streaming API
 
 This project consists on a challenge to a possible job.
 Its objectives are:
