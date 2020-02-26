@@ -9,6 +9,7 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonSyntaxException
 import com.google.gson.stream.JsonReader
 import com.ua.rho_challenge.network.Tweet
+import com.ua.rho_challenge.network.User
 import com.ua.rho_challenge.network.expiring_time
 import com.ua.rho_challenge.network.network.ApiService
 import kotlinx.coroutines.*
@@ -22,7 +23,6 @@ enum class DataApiStatus { LOADING, ERROR, DONE, NO_CONNECTION }
 class OverviewViewModel : ViewModel() {
     // Internally, we use a MutableLiveData, because we will be updating the List of Tweets with new values
     // The external LiveData interface to the property is immutable, so only this class can modify
-
     val properties: LiveData<ArrayList<Tweet>>
         get() = _tweetsList
 
@@ -36,15 +36,14 @@ class OverviewViewModel : ViewModel() {
     val status: LiveData<DataApiStatus>
         get() = _status
 
-    private val timestamps = HashMap<Tweet, Long>()
-
     // Create a Coroutine scope using a job to be able to cancel when needed
     private var viewModelJob = Job()
 
     // Runs on the Dispatchers.Default due to JSON parsing. Cannot run on the Dispatchers.MAIN in order not to freeze the UI.
     private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Default)
 
-    fun getStreamData(str: String) {
+    private fun getStreamData(str: String) {
+        Log.d("debug", "Fetching data")
         coroutineScope.launch {
             withContext(Dispatchers.Main) {
                 //Display loading animation in UI
@@ -75,9 +74,6 @@ class OverviewViewModel : ViewModel() {
                     }
                 }
             }
-            catch (e : JsonSyntaxException) {
-                Log.e("error", "JSONSyntaxException - ${e.message}");
-            }
             catch (e: Exception) {
                 Log.e("error", "ERROR ${e.message}")
                 withContext(Dispatchers.Main){
@@ -87,9 +83,14 @@ class OverviewViewModel : ViewModel() {
         }
     }
 
-    fun ttlRemoval() {
+    fun insertNewTweeet(){
+        tweetsList.add(Tweet("teste", "teste", "teste", User("https://firebasestorage.googleapis.com/v0/b/spicadiary-32494.appspot.com/o/TOUTBd65z4gSkEvaxJkPLL3H6782%2F12-12-2019%2000-20-27%2FPhotos%2F12-12-2019%2000-20-27_0.jpg?alt=media&token=234c5832-a6b2-499c-83df-fc9875621ffe","teste")))
+        _tweetsList.value = tweetsList
+    }
+
+    private fun ttlRemoval() {
         coroutineScope.launch {
-            Log.d("debug", "Removing coroutine")
+            Log.d("debug", "Removing elements..")
             delay(expiring_time)
             Log.d("debug", "Removing elements - " + tweetsList.size)
 
@@ -110,6 +111,7 @@ class OverviewViewModel : ViewModel() {
     // Sets images informing that there is no connection
      */
     fun unavailableInternetConnection() {
+        Log.d("debug", "No Connection! Setting proper image")
         _status.value = DataApiStatus.NO_CONNECTION
     }
 
@@ -117,5 +119,13 @@ class OverviewViewModel : ViewModel() {
         Log.d("debug", "onCleared")
         super.onCleared()
         viewModelJob.cancel()
+    }
+
+    fun cancelCorrotine(){
+        viewModelJob.cancel()
+    }
+
+    fun isJobExecuting(): Boolean {
+        return viewModelJob.isActive
     }
 }

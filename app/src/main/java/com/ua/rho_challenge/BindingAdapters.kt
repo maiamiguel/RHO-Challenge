@@ -1,6 +1,5 @@
 package com.ua.rho_challenge
 
-import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -46,6 +45,9 @@ fun bindStatusRecycler(rv: RecyclerView, status: DataApiStatus?) {
         DataApiStatus.DONE -> {
             rv.visibility = View.VISIBLE
         }
+        DataApiStatus.NO_CONNECTION -> {
+            rv.visibility = View.VISIBLE
+        }
     }
 }
 
@@ -76,6 +78,9 @@ fun bindStatus(statusImageView: ImageView, status: DataApiStatus?) {
     }
 }
 
+/**
+ * This binding adapter displays the textView informing that an error has occurred when one has indeed occurred.
+ */
 @BindingAdapter("errorTV")
 fun bindErrorTextView(tv: TextView, status: DataApiStatus?) {
     when (status) {
@@ -94,6 +99,10 @@ fun bindErrorTextView(tv: TextView, status: DataApiStatus?) {
     }
 }
 
+
+/**
+ * This binding adapter displays the data of the tweet in a more friendly format.
+ */
 @BindingAdapter("dateFormatted")
 fun transformDate(tv : TextView, data : String) {
     val splited = data.split(" ")

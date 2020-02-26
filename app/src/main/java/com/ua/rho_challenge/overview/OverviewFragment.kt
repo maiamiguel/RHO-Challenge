@@ -1,8 +1,7 @@
 package com.ua.rho_challenge.overview
 
-import android.content.Context
+import android.content.IntentFilter
 import android.net.ConnectivityManager
-import android.net.NetworkInfo
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -11,14 +10,19 @@ import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.ua.rho_challenge.ConnectivityReceiver
 import com.ua.rho_challenge.R
 import com.ua.rho_challenge.databinding.FragmentOverviewBinding
 import com.ua.rho_challenge.network.Tweet
 
+
 /**
  * This fragment shows a list of tweets consumed through the Twitter Streaming API.
  */
-class OverviewFragment : Fragment(), SearchView.OnQueryTextListener {
+class OverviewFragment : Fragment(), SearchView.OnQueryTextListener,
+    ConnectivityReceiver.ConnectivityReceiverListener {
+    private var isConnected: Boolean = false
+    private lateinit var connectivityReceiver: ConnectivityReceiver
     private lateinit var searchView: SearchView
 
     /**
@@ -56,37 +60,27 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener {
                 override fun onChanged(t: ArrayList<Tweet>?) {
                     t?.let {
                         // Sets new Data to RecyclerView
-                        adapter.setEmployeeList(it)
+                        adapter.setTweetsList(it)
                         // Scrolls down to last position of the list. Gives the UI flow perception
                         //binding.tweetList.scrollToPosition(t.size - 1)
                     }
                 }
             })
 
-        if (!context?.let { isNetworkAvailable(it) }!!){
-            viewModel.unavailableInternetConnection()
-        }
+        connectivityReceiver = ConnectivityReceiver()
+
+        activity?.registerReceiver(
+            connectivityReceiver,
+            IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+        )
 
         setHasOptionsMenu(true)
         return binding.root
     }
 
-    /**
-     * Checks if there is an internet connection
-     */
-    fun isNetworkAvailable(context: Context): Boolean {
-        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetwork: NetworkInfo? = cm.activeNetworkInfo
-        val isConnected: Boolean = activeNetwork?.isConnectedOrConnecting == true
-
-        if (!isConnected) {
-            Log.d("debug", "Device is not connected!")
-            displayToast(getString(R.string.no_connection))
-        }
-        else{
-            Log.d("debug", "Device is connected!")
-        }
-        return isConnected
+    override fun onPause() {
+        super.onPause()
+        activity?.unregisterReceiver(connectivityReceiver)
     }
 
     /**
@@ -106,13 +100,10 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener {
      * Listens to search text submission and passes it to viewModel to initiate the search
      */
     override fun onQueryTextSubmit(query: String?): Boolean {
-        if (context?.let { isNetworkAvailable(it) }!!){
-            if (!query.isNullOrBlank() or !query.isNullOrEmpty()) {
-                searchView.clearFocus();
-                displayToast(getString(R.string.start_search))
-                query?.let { viewModel.searchStream(it) }
-
-            }
+        if ((!query.isNullOrBlank() or !query.isNullOrEmpty()) and isConnected) {
+            searchView.clearFocus();
+            displayToast(getString(R.string.start_search))
+            query?.let { viewModel.searchStream(it) }
             return true
         }
         return false
@@ -126,7 +117,28 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener {
      * Generic function to display toasts
      */
     fun displayToast(msg: String) {
-        val t = Toast.makeText(context, msg, Toast.LENGTH_LONG)
-        t.show()
+        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        ConnectivityReceiver.connectivityReceiverListener = this
+    }
+
+    override fun onNetworkConnectionChanged(is_connected: Boolean) {
+        if (is_connected) {
+            Log.d("debug", "Device is connected.");
+            isConnected = true;
+            displayToast(getString(R.string.connection_yes))
+        } else {
+            Log.d("debug", "Device is not Connected");
+            isConnected = false;
+            displayToast(getString(R.string.no_connection))
+            viewModel.unavailableInternetConnection()
+
+            if (viewModel.isJobExecuting()) {
+                viewModel.cancelCorrotine()
+            }
+        }
     }
 }

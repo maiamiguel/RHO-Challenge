@@ -6,4 +6,5 @@
     <string name="start_search">Search started..</string>
     <string name="no_connection">Device doesn\'t have an internet connection..</string>
     <string name="error">An error has occurred..</string>
+    <string name="connection_yes">Connected</string>
 </resources>

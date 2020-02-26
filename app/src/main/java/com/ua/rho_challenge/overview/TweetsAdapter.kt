@@ -27,19 +27,19 @@ class TweetsAdapter : RecyclerView.Adapter<TweetsAdapter.TweetViewHolder?>() {
     }
 
     override fun onBindViewHolder(
-        employeeViewHolder: TweetViewHolder,
+        tweetViewHolder: TweetViewHolder,
         i: Int
     ) {
         val currentStudent: Tweet = tweets.get(i)
-        employeeViewHolder.tweetsListItemBinding.property = currentStudent
+        tweetViewHolder.tweetsListItemBinding.property = currentStudent
     }
 
     override fun getItemCount(): Int {
         return if (tweets.isEmpty()) 0 else tweets.size
     }
 
-    fun setEmployeeList(employees: ArrayList<Tweet>) {
-        this.tweets = employees
+    fun setTweetsList(tweets: ArrayList<Tweet>) {
+        this.tweets = tweets
         notifyDataSetChanged()
     }
 

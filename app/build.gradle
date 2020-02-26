@@ -8,6 +8,7 @@ android {
     compileSdkVersion 29
     dataBinding {
         enabled = true
+        enabledForTests = true
     }
     buildToolsVersion "29.0.2"
     defaultConfig {
@@ -23,6 +24,9 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+    testOptions.unitTests {
+        includeAndroidResources = true
     }
 }
 
@@ -71,4 +75,28 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:3.11.0'
     implementation 'se.akerfeldt:okhttp-signpost:1.1.0'
     implementation 'oauth.signpost:signpost-core:1.2.1.2'
+
+    // Required for local unit tests (JUnit 4 framework)
+    testImplementation "junit:junit:4.12"
+    testImplementation "org.mockito:mockito-core:2.27.0"
+
+    // Required for instrumented tests
+    androidTestImplementation 'com.android.support:support-annotations:28.0.0'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+
+    // Dependencies for local unit tests
+    testImplementation "junit:junit:4.12"
+    testImplementation "org.hamcrest:hamcrest-all:1.3"
+    testImplementation "androidx.arch.core:core-testing:2.1.0"
+    testImplementation "org.robolectric:robolectric:4.3.1"
+
+    // AndroidX Test - JVM testing
+    testImplementation "androidx.test:core-ktx:1.2.0"
+    testImplementation "androidx.test.ext:junit:1.1.1"
+
+    // AndroidX Test - Instrumented testing
+    androidTestImplementation "androidx.test.ext:junit:1.1.1"
+    androidTestImplementation "androidx.test.espresso:espresso-core:3.3.0-alpha04"
+
+    kapt 'com.android.databinding:compiler:3.1.4'
 }
