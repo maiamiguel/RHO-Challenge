@@ -15,7 +15,7 @@ Twitter developer account is needed. An example of how to do it:
 https://www.extly.com/docs/autotweetng_joocial/tutorials/how-to-auto-post-from-joomla-to-twitter/apply-for-a-twitter-developer-account/#apply-for-a-developer-account
 Finally, change the API keys in network/Utils.kt file to yours.
 
-## Uses Android Jetpack components like:
+## This app uses Android Jetpack components like:
 - MVVM Architecture
 - LiveData
 - Kotlin Coroutines
