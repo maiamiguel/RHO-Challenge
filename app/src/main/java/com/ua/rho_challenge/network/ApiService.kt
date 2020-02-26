@@ -31,9 +31,9 @@ class ApiService() {
             .build()
 
         /**
-         * Use the Retrofit builder to build a retrofit object using CoroutineCallAdapterFactory to support Kotlin Coroutines.
+         * Use the Retrofit builder to build a retrofit object using [CoroutineCallAdapterFactory] to support Kotlin Coroutines.
          */
-        var retrofit = retrofit2.Retrofit.Builder()
+        val retrofit = retrofit2.Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .addCallAdapterFactory(CoroutineCallAdapterFactory())
@@ -45,7 +45,7 @@ class ApiService() {
 }
 
 /**
- * A public interface that exposes the [getProperties] method
+ * A public interface that exposes the [getTweetList] method
  */
 interface TwitterStreamingApi {
     /**

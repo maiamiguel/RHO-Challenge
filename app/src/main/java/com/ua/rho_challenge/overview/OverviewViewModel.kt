@@ -6,13 +6,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
+import com.google.gson.JsonSyntaxException
 import com.google.gson.stream.JsonReader
 import com.ua.rho_challenge.network.Tweet
+import com.ua.rho_challenge.network.expiring_time
 import com.ua.rho_challenge.network.network.ApiService
 import kotlinx.coroutines.*
 import java.io.InputStreamReader
 
-enum class DataApiStatus { LOADING, ERROR, DONE }
+enum class DataApiStatus { LOADING, ERROR, DONE, NO_CONNECTION }
 
 /**
  * The [ViewModel] that is attached to the [OverviewFragment].
@@ -34,9 +36,12 @@ class OverviewViewModel : ViewModel() {
     val status: LiveData<DataApiStatus>
         get() = _status
 
+    private val timestamps = HashMap<Tweet, Long>()
+
     // Create a Coroutine scope using a job to be able to cancel when needed
     private var viewModelJob = Job()
 
+    // Runs on the Dispatchers.Default due to JSON parsing. Cannot run on the Dispatchers.MAIN in order not to freeze the UI.
     private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Default)
 
     fun getStreamData(str: String) {
@@ -49,23 +54,50 @@ class OverviewViewModel : ViewModel() {
                 val listResult = ApiService().api!!.getTweetList(str).await()
 
                 while (!listResult.source().exhausted()) {
-                    val reader = JsonReader( InputStreamReader(listResult.byteStream()) )
+                    val reader = JsonReader(InputStreamReader(listResult.byteStream()))
+                    // https://stackoverflow.com/questions/11484353/gson-throws-malformedjsonexception
+                    reader.setLenient(true);
                     val gson = GsonBuilder().create()
                     val j = gson.fromJson<JsonObject>(reader, JsonObject::class.java)
+
                     Log.d("debug", "JSON: " + j.toString())
 
-                    val t = Tweet.fromJsonObject(j)
+                    if (j.get("text") != null && j.getAsJsonObject("user").get("profile_image_url_https") != null && j.getAsJsonObject("user").get("name") != null){
+                        val t = gson.fromJson<Tweet>(j, Tweet::class.java)
 
-                    withContext(Dispatchers.Main) {
-                        _status.value = DataApiStatus.DONE
-                        // https://stackoverflow.com/questions/47941537/notify-observer-when-item-is-added-to-list-of-livedata
-                        tweetsList.add(t)
-                        _tweetsList.value = tweetsList
+                        withContext(Dispatchers.Main) {
+                            _status.value = DataApiStatus.DONE
+                            // https://stackoverflow.com/questions/47941537/notify-observer-when-item-is-added-to-list-of-livedata
+                            tweetsList.add(t)
+                            _tweetsList.value = tweetsList
+                            ttlRemoval()
+                        }
                     }
                 }
-            } catch (e: Exception) {
-                Log.e("error", "ERROR ${e.message}")
             }
+            catch (e : JsonSyntaxException) {
+                Log.e("error", "JSONSyntaxException - ${e.message}");
+            }
+            catch (e: Exception) {
+                Log.e("error", "ERROR ${e.message}")
+                withContext(Dispatchers.Main){
+                    _status.value = DataApiStatus.ERROR
+                }
+            }
+        }
+    }
+
+    fun ttlRemoval() {
+        coroutineScope.launch {
+            Log.d("debug", "Removing coroutine")
+            delay(expiring_time)
+            Log.d("debug", "Removing elements - " + tweetsList.size)
+
+            withContext(Dispatchers.Main) {
+                _tweetsList.value = tweetsList
+                tweetsList.remove(tweetsList.first())
+            }
+            Log.d("debug", "Removed elements - " + tweetsList.size)
         }
     }
 
@@ -74,8 +106,11 @@ class OverviewViewModel : ViewModel() {
         getStreamData(str)
     }
 
-    fun unavailableInternetConnection(){
-        _status.value = DataApiStatus.ERROR
+    /*
+    // Sets images informing that there is no connection
+     */
+    fun unavailableInternetConnection() {
+        _status.value = DataApiStatus.NO_CONNECTION
     }
 
     override fun onCleared() {

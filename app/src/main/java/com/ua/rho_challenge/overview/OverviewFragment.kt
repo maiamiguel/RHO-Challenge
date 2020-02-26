@@ -1,9 +1,6 @@
 package com.ua.rho_challenge.overview
 
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.os.Bundle
@@ -14,13 +11,12 @@ import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.ua.rho_challenge.R
 import com.ua.rho_challenge.databinding.FragmentOverviewBinding
 import com.ua.rho_challenge.network.Tweet
 
 /**
- * This fragment shows the list of tweets consumed through the Twitter Streaming API.
+ * This fragment shows a list of tweets consumed through the Twitter Streaming API.
  */
 class OverviewFragment : Fragment(), SearchView.OnQueryTextListener {
     private lateinit var searchView: SearchView
@@ -62,7 +58,7 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener {
                         // Sets new Data to RecyclerView
                         adapter.setEmployeeList(it)
                         // Scrolls down to last position of the list. Gives the UI flow perception
-                        binding.tweetList.scrollToPosition(t.size - 1)
+                        //binding.tweetList.scrollToPosition(t.size - 1)
                     }
                 }
             })
@@ -75,6 +71,9 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener {
         return binding.root
     }
 
+    /**
+     * Checks if there is an internet connection
+     */
     fun isNetworkAvailable(context: Context): Boolean {
         val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val activeNetwork: NetworkInfo? = cm.activeNetworkInfo
@@ -91,7 +90,7 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener {
     }
 
     /**
-     * Inflates the search menu.
+     * Inflates the search menu
      */
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.search_menu, menu)
@@ -103,6 +102,9 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
+    /**
+     * Listens to search text submission and passes it to viewModel to initiate the search
+     */
     override fun onQueryTextSubmit(query: String?): Boolean {
         if (context?.let { isNetworkAvailable(it) }!!){
             if (!query.isNullOrBlank() or !query.isNullOrEmpty()) {
@@ -120,6 +122,9 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener {
         return false
     }
 
+    /**
+     * Generic function to display toasts
+     */
     fun displayToast(msg: String) {
         val t = Toast.makeText(context, msg, Toast.LENGTH_LONG)
         t.show()

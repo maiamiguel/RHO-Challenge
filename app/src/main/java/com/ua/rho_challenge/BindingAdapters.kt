@@ -34,30 +34,6 @@ fun bindImage(imgView: ImageView, imgUrl: String?) {
  * displays a broken image to reflect the connection error.  When the request is finished, it
  * hides the image view.
  */
-@BindingAdapter("apiStatus")
-fun bindStatus(statusImageView: ImageView, status: DataApiStatus?) {
-    when (status) {
-        DataApiStatus.LOADING -> {
-            statusImageView.visibility = View.VISIBLE
-            statusImageView.setImageResource(R.drawable.loading_animation)
-        }
-        DataApiStatus.ERROR -> {
-            statusImageView.visibility = View.VISIBLE
-            statusImageView.setImageResource(R.drawable.ic_connection_error)
-        }
-        DataApiStatus.DONE -> {
-            statusImageView.visibility = View.GONE
-        }
-    }
-}
-
-
-/**
- * This binding adapter displays the [DataApiStatus] of the network request in an image view.  When
- * the request is loading, it displays a loading_animation.  If the request has an error, it
- * displays a broken image to reflect the connection error.  When the request is finished, it
- * hides the image view.
- */
 @BindingAdapter("apiStatusRecycler")
 fun bindStatusRecycler(rv: RecyclerView, status: DataApiStatus?) {
     when (status) {
@@ -69,6 +45,51 @@ fun bindStatusRecycler(rv: RecyclerView, status: DataApiStatus?) {
         }
         DataApiStatus.DONE -> {
             rv.visibility = View.VISIBLE
+        }
+    }
+}
+
+/**
+ * This binding adapter displays the [DataApiStatus] of the network request in an image view.  When
+ * the request is loading, it displays a loading_animation.  If the request has an error, it
+ * displays a broken image to reflect the connection error.  When the request is finished, it
+ * hides the image view.
+ */
+@BindingAdapter("apiStatus")
+fun bindStatus(statusImageView: ImageView, status: DataApiStatus?) {
+    when (status) {
+        DataApiStatus.LOADING -> {
+            statusImageView.visibility = View.VISIBLE
+            statusImageView.setImageResource(R.drawable.loading_animation)
+        }
+        DataApiStatus.NO_CONNECTION -> {
+            statusImageView.visibility = View.VISIBLE
+            statusImageView.setImageResource(R.drawable.ic_connection_error)
+        }
+        DataApiStatus.ERROR -> {
+            statusImageView.visibility = View.VISIBLE
+            statusImageView.setImageResource(R.drawable.error)
+        }
+        DataApiStatus.DONE -> {
+            statusImageView.visibility = View.GONE
+        }
+    }
+}
+
+@BindingAdapter("errorTV")
+fun bindErrorTextView(tv: TextView, status: DataApiStatus?) {
+    when (status) {
+        DataApiStatus.LOADING -> {
+            tv.visibility = View.GONE
+        }
+        DataApiStatus.ERROR -> {
+            tv.visibility = View.VISIBLE
+        }
+        DataApiStatus.DONE -> {
+            tv.visibility = View.GONE
+        }
+        DataApiStatus.NO_CONNECTION -> {
+            tv.visibility = View.GONE
         }
     }
 }

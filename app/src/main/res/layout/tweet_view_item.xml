@@ -40,7 +40,7 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="@string/profile_pic"
                     android:scaleType="fitXY"
-                    app:profileImageUrl="@{property.profileImgUrl}"
+                    app:profileImageUrl="@{property.user.profilePic}"
                     bind:layout_constraintBottom_toBottomOf="parent"
                     bind:layout_constraintStart_toStartOf="parent"
                     bind:layout_constraintTop_toTopOf="parent" />
@@ -54,7 +54,7 @@
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="8dp"
                     android:padding="4dp"
-                    android:text="@{property.userName}"
+                    android:text="@{property.user.username}"
                     android:textColor="@color/colorPrimary"
                     android:textSize="18sp"
                     bind:layout_constraintEnd_toEndOf="parent"
