@@ -80,7 +80,7 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener,
 
     override fun onPause() {
         super.onPause()
-        activity?.unregisterReceiver(connectivityReceiver)
+        //activity?.unregisterReceiver(connectivityReceiver)
     }
 
     /**
@@ -103,6 +103,11 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener,
         if ((!query.isNullOrBlank() or !query.isNullOrEmpty()) and isConnected) {
             searchView.clearFocus();
             displayToast(getString(R.string.start_search))
+
+            if (viewModel.isJobRunning()){
+                viewModel.cancelJob()
+            }
+
             query?.let { viewModel.searchStream(it) }
             return true
         }
@@ -134,10 +139,8 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener,
             Log.d("debug", "Device is not Connected");
             isConnected = false;
             displayToast(getString(R.string.no_connection))
-            viewModel.unavailableInternetConnection()
-
-            if (viewModel.isJobExecuting()) {
-                viewModel.cancelCorrotine()
+            if (viewModel.isJobRunning()){
+                viewModel.cancelJob()
             }
         }
     }

@@ -40,10 +40,10 @@ class OverviewViewModel : ViewModel() {
     private var viewModelJob = Job()
 
     // Runs on the Dispatchers.Default due to JSON parsing. Cannot run on the Dispatchers.MAIN in order not to freeze the UI.
-    private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Default)
+    private var coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Default)
 
-    private fun getStreamData(str: String) {
-        Log.d("debug", "Fetching data")
+    fun getStreamData(str: String) {
+        Log.d("debug", "Fetching data..")
         coroutineScope.launch {
             withContext(Dispatchers.Main) {
                 //Display loading animation in UI
@@ -74,16 +74,22 @@ class OverviewViewModel : ViewModel() {
                     }
                 }
             }
+            catch (e : JsonSyntaxException) {
+                Log.e("error", "JsonSyntaxException ${e.message}");
+            }
             catch (e: Exception) {
                 Log.e("error", "ERROR ${e.message}")
-                withContext(Dispatchers.Main){
-                    _status.value = DataApiStatus.ERROR
-                }
+                //Commented this in order to preserve RecyclerView data as it is required
+//                withContext(Dispatchers.Main){
+//                    _status.value = DataApiStatus.ERROR
+//                }
+
             }
         }
     }
 
-    fun insertNewTweeet(){
+    // Just for testing
+    fun insertNewTweet(){
         tweetsList.add(Tweet("teste", "teste", "teste", User("https://firebasestorage.googleapis.com/v0/b/spicadiary-32494.appspot.com/o/TOUTBd65z4gSkEvaxJkPLL3H6782%2F12-12-2019%2000-20-27%2FPhotos%2F12-12-2019%2000-20-27_0.jpg?alt=media&token=234c5832-a6b2-499c-83df-fc9875621ffe","teste")))
         _tweetsList.value = tweetsList
     }
@@ -107,25 +113,20 @@ class OverviewViewModel : ViewModel() {
         getStreamData(str)
     }
 
-    /*
-    // Sets images informing that there is no connection
-     */
-    fun unavailableInternetConnection() {
-        Log.d("debug", "No Connection! Setting proper image")
-        _status.value = DataApiStatus.NO_CONNECTION
-    }
-
     override fun onCleared() {
         Log.d("debug", "onCleared")
         super.onCleared()
         viewModelJob.cancel()
     }
 
-    fun cancelCorrotine(){
-        viewModelJob.cancel()
+    fun isJobRunning() : Boolean{
+        return viewModelJob.isActive
     }
 
-    fun isJobExecuting(): Boolean {
-        return viewModelJob.isActive
+    fun cancelJob(){
+        Log.d("debug", "Cancelling current Job!")
+        viewModelJob.cancel()
+        viewModelJob = Job()
+        coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Default)
     }
 }

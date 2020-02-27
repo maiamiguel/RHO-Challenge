@@ -1,24 +1,23 @@
 package com.ua.rho_challenge
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.ua.rho_challenge.overview.OverviewViewModel
-import net.bytebuddy.implementation.FixedValue.nullValue
-import org.junit.Test
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.android.architecture.blueprints.todoapp.getOrAwaitValue
+import com.ua.rho_challenge.overview.OverviewViewModel
 import org.hamcrest.CoreMatchers
-import org.hamcrest.CoreMatchers.*
-import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.not
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
+import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.runners.JUnit4
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(JUnit4::class)
 class OverviewViewModelTest {
 
     private lateinit var viewModel: OverviewViewModel
 
-    @get:Rule
+    @Rule @JvmField
     var instantExecutorRule = InstantTaskExecutorRule()
 
     @Before
@@ -31,7 +30,7 @@ class OverviewViewModelTest {
         // Given a fresh ViewModel
         val viewModel = OverviewViewModel()
 
-        viewModel.insertNewTweeet()
+        viewModel.insertNewTweet()
 
         assertThat(viewModel.properties.getOrAwaitValue(), not(CoreMatchers.nullValue()))
     }

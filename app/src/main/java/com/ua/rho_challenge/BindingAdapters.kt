@@ -40,7 +40,7 @@ fun bindStatusRecycler(rv: RecyclerView, status: DataApiStatus?) {
             rv.visibility = View.INVISIBLE
         }
         DataApiStatus.ERROR -> {
-            rv.visibility = View.GONE
+            rv.visibility = View.INVISIBLE
         }
         DataApiStatus.DONE -> {
             rv.visibility = View.VISIBLE
