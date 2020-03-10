@@ -6,14 +6,14 @@
     <data>
         <variable
             name="viewModel"
-            type="com.ua.rho_challenge.overview.OverviewViewModel" />
+            type="com.ua.rho_challenge.viewmodels.OverviewViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/rootLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".MainActivity"   >
+        tools:context=".ui.MainActivity"   >
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/tweetList"

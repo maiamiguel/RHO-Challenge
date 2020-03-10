@@ -1,4 +1,4 @@
-package com.ua.rho_challenge
+package com.ua.rho_challenge.adapters
 
 import android.view.View
 import android.widget.ImageView
@@ -8,7 +8,8 @@ import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import com.ua.rho_challenge.overview.DataApiStatus
+import com.ua.rho_challenge.R
+import com.ua.rho_challenge.viewmodels.DataApiStatus
 
 /**
  * Uses the Glide library to load an image by URL into an [ImageView]

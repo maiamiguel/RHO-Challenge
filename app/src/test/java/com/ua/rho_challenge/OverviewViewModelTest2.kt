@@ -7,9 +7,8 @@ import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.Observer
 import com.ua.rho_challenge.network.Tweet
 import com.ua.rho_challenge.network.network.ApiService
-import com.ua.rho_challenge.network.network.TwitterStreamingApi
-import com.ua.rho_challenge.overview.DataApiStatus
-import com.ua.rho_challenge.overview.OverviewViewModel
+import com.ua.rho_challenge.viewmodels.DataApiStatus
+import com.ua.rho_challenge.viewmodels.OverviewViewModel
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before

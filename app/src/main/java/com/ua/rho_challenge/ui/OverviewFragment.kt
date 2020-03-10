@@ -1,4 +1,4 @@
-package com.ua.rho_challenge.overview
+package com.ua.rho_challenge.ui
 
 import android.content.IntentFilter
 import android.net.ConnectivityManager
@@ -10,12 +10,11 @@ import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import com.ua.rho_challenge.ConnectivityReceiver
 import com.ua.rho_challenge.R
 import com.ua.rho_challenge.databinding.FragmentOverviewBinding
-import com.ua.rho_challenge.network.Tweet
-
+import com.ua.rho_challenge.viewmodels.OverviewViewModel
+import com.ua.rho_challenge.adapters.TweetsAdapter
 
 /**
  * This fragment shows a list of tweets consumed through the Twitter Streaming API.

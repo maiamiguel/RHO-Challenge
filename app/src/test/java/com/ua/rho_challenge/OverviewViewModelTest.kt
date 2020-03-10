@@ -2,7 +2,7 @@ package com.ua.rho_challenge
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.android.architecture.blueprints.todoapp.getOrAwaitValue
-import com.ua.rho_challenge.overview.OverviewViewModel
+import com.ua.rho_challenge.viewmodels.OverviewViewModel
 import org.hamcrest.CoreMatchers
 import org.hamcrest.Matchers.not
 import org.junit.Assert.*

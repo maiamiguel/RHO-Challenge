@@ -1,7 +1,8 @@
-package com.ua.rho_challenge
+package com.ua.rho_challenge.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.ua.rho_challenge.R
 
 class MainActivity : AppCompatActivity() {
 

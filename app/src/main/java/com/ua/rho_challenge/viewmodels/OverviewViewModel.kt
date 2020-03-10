@@ -1,9 +1,10 @@
-package com.ua.rho_challenge.overview
+package com.ua.rho_challenge.viewmodels
 
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.JsonSyntaxException
@@ -41,6 +42,8 @@ class OverviewViewModel : ViewModel() {
 
     // Runs on the Dispatchers.Default due to JSON parsing. Cannot run on the Dispatchers.MAIN in order not to freeze the UI.
     private var coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Default)
+
+    private var searchJob : Job? = null
 
     private suspend fun getStreamData(str: String) {
         Log.d("debug", "Fetching data..")
@@ -89,7 +92,7 @@ class OverviewViewModel : ViewModel() {
     }
 
     private fun ttlRemoval() {
-        coroutineScope.launch {
+        viewModelScope.launch(Dispatchers.Default) {
             Log.d("debug", "Removing elements..")
             delay(expiring_time)
             Log.d("debug", "Removing elements - " + tweetsList.size)
@@ -104,7 +107,7 @@ class OverviewViewModel : ViewModel() {
 
     fun searchStream(str: String) {
         Log.d("debug", "Search parameter to stream - $str")
-        coroutineScope.launch {
+        searchJob = viewModelScope.launch(Dispatchers.Default){
             getStreamData(str)
         }
     }
@@ -116,11 +119,14 @@ class OverviewViewModel : ViewModel() {
     }
 
     fun isJobRunning() : Boolean{
-        return coroutineScope.coroutineContext.isActive
+        if (searchJob != null){
+            return searchJob?.isActive!!
+        }
+        return false
     }
 
     fun cancelJob(){
         Log.d("debug", "Cancelling current Job!")
-        coroutineScope.coroutineContext.cancelChildren()
+        searchJob?.cancel()
     }
 }

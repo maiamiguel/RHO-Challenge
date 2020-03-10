@@ -1,4 +1,4 @@
-package com.ua.rho_challenge.overview
+package com.ua.rho_challenge.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
