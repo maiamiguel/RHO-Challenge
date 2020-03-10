@@ -1,127 +1,145 @@
 package com.ua.rho_challenge.overview
 
+import android.content.IntentFilter
+import android.net.ConnectivityManager
+import android.os.Bundle
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonObject
-import com.google.gson.JsonSyntaxException
-import com.google.gson.stream.JsonReader
+import android.view.*
+import android.widget.Toast
+import androidx.appcompat.widget.SearchView
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
+import com.ua.rho_challenge.ConnectivityReceiver
+import com.ua.rho_challenge.R
+import com.ua.rho_challenge.databinding.FragmentOverviewBinding
 import com.ua.rho_challenge.network.Tweet
-import com.ua.rho_challenge.network.User
-import com.ua.rho_challenge.network.expiring_time
-import com.ua.rho_challenge.network.network.ApiService
-import kotlinx.coroutines.*
-import java.io.InputStreamReader
 
-enum class DataApiStatus { LOADING, ERROR, DONE, NO_CONNECTION }
 
 /**
- * The [ViewModel] that is attached to the [OverviewFragment].
+ * This fragment shows a list of tweets consumed through the Twitter Streaming API.
  */
-class OverviewViewModel : ViewModel() {
-    // Internally, we use a MutableLiveData, because we will be updating the List of Tweets with new values
-    // The external LiveData interface to the property is immutable, so only this class can modify
-    val properties: LiveData<ArrayList<Tweet>>
-        get() = _tweetsList
+class OverviewFragment : Fragment(), SearchView.OnQueryTextListener,
+    ConnectivityReceiver.ConnectivityReceiverListener {
+    private var isConnected: Boolean = false
+    private lateinit var connectivityReceiver: ConnectivityReceiver
+    private lateinit var searchView: SearchView
 
-    private val tweetsList = ArrayList<Tweet>()
-    // The internal MutableLiveData that stores the list of tweets
-    private val _tweetsList = MutableLiveData<ArrayList<Tweet>>()
+    /**
+     * Lazily initialize [OverviewViewModel].
+     */
+    private val viewModel: OverviewViewModel by lazy {
+        ViewModelProvider(this).get(OverviewViewModel::class.java)
+    }
 
-    // The internal MutableLiveData that stores the status of the request
-    private val _status = MutableLiveData<DataApiStatus>()
-    // The external immutable LiveData for the request status
-    val status: LiveData<DataApiStatus>
-        get() = _status
+    /**
+     * Inflates the layout with Data Binding, sets its lifecycle owner to the OverviewFragment
+     * to enable Data Binding to observe LiveData, and sets up the RecyclerView with an adapter.
+     */
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val binding = FragmentOverviewBinding.inflate(inflater)
 
-    // Create a Coroutine scope using a job to be able to cancel when needed
-    private var viewModelJob = Job()
+        // Allows Data Binding to Observe LiveData with the lifecycle of this Fragment
+        binding.lifecycleOwner = this
 
-    // Runs on the Dispatchers.Default due to JSON parsing. Cannot run on the Dispatchers.MAIN in order not to freeze the UI.
-    private var coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Default)
+        // Giving the binding access to the OverviewViewModel
+        binding.viewModel = viewModel
 
-    private suspend fun getStreamData(str: String) {
-        Log.d("debug", "Fetching data..")
+        // Sets the adapter of the tweetList RecyclerView
+        val adapter = TweetsAdapter()
 
-        withContext(Dispatchers.Main) {
-            //Display loading animation in UI
-            _status.value = DataApiStatus.LOADING
-        }
-        try {
-            val listResult = ApiService().api!!.getTweetList(str).await()
+        binding.tweetList.adapter = adapter
 
-            while (true) {
-                val reader = JsonReader(InputStreamReader(listResult.byteStream()))
-                // https://stackoverflow.com/questions/11484353/gson-throws-malformedjsonexception
-                reader.isLenient = true;
-                val gson = GsonBuilder().create()
-                val j = gson.fromJson<JsonObject>(reader, JsonObject::class.java)
-
-                Log.d("debug", "JSON: " + j.toString())
-
-                if (j.get("text") != null && j.getAsJsonObject("user").get("profile_image_url_https") != null && j.getAsJsonObject("user").get("name") != null){
-                    val t = gson.fromJson(j, Tweet::class.java)
-
-                    withContext(Dispatchers.Main) {
-                        _status.value = DataApiStatus.DONE
-                        // https://stackoverflow.com/questions/47941537/notify-observer-when-item-is-added-to-list-of-livedata
-                        tweetsList.add(t)
-                        _tweetsList.value = tweetsList
-                        ttlRemoval()
-                    }
+        viewModel.properties.observe(
+            this.viewLifecycleOwner,
+            Observer { t ->
+                t?.let {
+                    // Sets new Data to RecyclerView
+                    adapter.setTweetsList(it)
+                    // Scrolls down to last position of the list. Gives the UI flow perception
+                    //binding.tweetList.scrollToPosition(t.size - 1)
                 }
+            })
+
+        connectivityReceiver = ConnectivityReceiver()
+
+        activity?.registerReceiver(
+            connectivityReceiver,
+            IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+        )
+
+        setHasOptionsMenu(true)
+        return binding.root
+    }
+
+    override fun onPause() {
+        super.onPause()
+        activity?.unregisterReceiver(connectivityReceiver)
+    }
+
+    /**
+     * Inflates the search menu
+     */
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.search_menu, menu)
+
+        val searchItem = menu.findItem(R.id.action_search)
+        searchView = searchItem.actionView as SearchView
+        searchView.setOnQueryTextListener(this)
+
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    /**
+     * Listens to search text submission and passes it to viewModel to initiate the search
+     */
+    override fun onQueryTextSubmit(query: String?): Boolean {
+        if ((!query.isNullOrBlank() or !query.isNullOrEmpty()) and isConnected) {
+            searchView.clearFocus();
+            displayToast(getString(R.string.start_search))
+
+            query?.let { viewModel.searchStream(it) }
+            return true
+        }
+        return false
+    }
+
+    override fun onQueryTextChange(newText: String?): Boolean {
+        if (viewModel.isJobRunning()){
+            viewModel.cancelJob()
+        }
+        return false
+    }
+
+    /**
+     * Generic function to display toasts
+     */
+    private fun displayToast(msg: String) {
+        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        ConnectivityReceiver.connectivityReceiverListener = this
+    }
+
+    override fun onNetworkConnectionChanged(isConnected: Boolean) {
+        if (isConnected) {
+            Log.d("debug", "Device is connected.");
+            this.isConnected = true;
+            displayToast(getString(R.string.connection_yes))
+        } else {
+            Log.d("debug", "Device is not Connected");
+            this.isConnected = false;
+            displayToast(getString(R.string.no_connection))
+            if (viewModel.isJobRunning()){
+                viewModel.cancelJob()
             }
         }
-        catch (e : JsonSyntaxException) {
-            Log.e("error", "JsonSyntaxException ${e.message}");
-        }
-        catch (e: Exception) {
-            Log.e("error", "ERROR ${e.message}")
-        }
-    }
-
-    // Just for testing
-    fun insertNewTweet(){
-        tweetsList.add(Tweet("teste", "teste", "teste", User("https://firebasestorage.googleapis.com/v0/b/spicadiary-32494.appspot.com/o/TOUTBd65z4gSkEvaxJkPLL3H6782%2F12-12-2019%2000-20-27%2FPhotos%2F12-12-2019%2000-20-27_0.jpg?alt=media&token=234c5832-a6b2-499c-83df-fc9875621ffe","teste")))
-        _tweetsList.value = tweetsList
-    }
-
-    private fun ttlRemoval() {
-        coroutineScope.launch {
-            Log.d("debug", "Removing elements..")
-            delay(expiring_time)
-            Log.d("debug", "Removing elements - " + tweetsList.size)
-
-            withContext(Dispatchers.Main) {
-                _tweetsList.value = tweetsList
-                tweetsList.remove(tweetsList.first())
-            }
-            Log.d("debug", "Removed elements - " + tweetsList.size)
-        }
-    }
-
-    fun searchStream(str: String) {
-        Log.d("debug", "Search parameter to stream - $str")
-        coroutineScope.launch {
-            getStreamData(str)
-        }
-    }
-
-    override fun onCleared() {
-        Log.d("debug", "onCleared")
-        super.onCleared()
-        viewModelJob.cancel()
-    }
-
-    fun isJobRunning() : Boolean{
-        return coroutineScope.coroutineContext.isActive
-    }
-
-    fun cancelJob(){
-        Log.d("debug", "Cancelling current Job!")
-        tweetsList.clear()
-        coroutineScope.coroutineContext.cancelChildren()
     }
 }
