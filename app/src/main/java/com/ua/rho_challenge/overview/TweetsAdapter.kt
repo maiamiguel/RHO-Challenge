@@ -30,8 +30,8 @@ class TweetsAdapter : RecyclerView.Adapter<TweetsAdapter.TweetViewHolder?>() {
         tweetViewHolder: TweetViewHolder,
         i: Int
     ) {
-        val currentStudent: Tweet = tweets.get(i)
-        tweetViewHolder.tweetsListItemBinding.property = currentStudent
+        val currentTweet: Tweet = tweets.get(i)
+        tweetViewHolder.tweetsListItemBinding.property = currentTweet
     }
 
     override fun getItemCount(): Int {
