@@ -42,49 +42,43 @@ class OverviewViewModel : ViewModel() {
     // Runs on the Dispatchers.Default due to JSON parsing. Cannot run on the Dispatchers.MAIN in order not to freeze the UI.
     private var coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Default)
 
-    fun getStreamData(str: String) {
+    private suspend fun getStreamData(str: String) {
         Log.d("debug", "Fetching data..")
-        coroutineScope.launch {
-            withContext(Dispatchers.Main) {
-                //Display loading animation in UI
-                _status.value = DataApiStatus.LOADING
-            }
-            try {
-                val listResult = ApiService().api!!.getTweetList(str).await()
 
-                while (!listResult.source().exhausted()) {
-                    val reader = JsonReader(InputStreamReader(listResult.byteStream()))
-                    // https://stackoverflow.com/questions/11484353/gson-throws-malformedjsonexception
-                    reader.setLenient(true);
-                    val gson = GsonBuilder().create()
-                    val j = gson.fromJson<JsonObject>(reader, JsonObject::class.java)
+        withContext(Dispatchers.Main) {
+            //Display loading animation in UI
+            _status.value = DataApiStatus.LOADING
+        }
+        try {
+            val listResult = ApiService().api!!.getTweetList(str).await()
 
-                    Log.d("debug", "JSON: " + j.toString())
+            while (true) {
+                val reader = JsonReader(InputStreamReader(listResult.byteStream()))
+                // https://stackoverflow.com/questions/11484353/gson-throws-malformedjsonexception
+                reader.isLenient = true;
+                val gson = GsonBuilder().create()
+                val j = gson.fromJson<JsonObject>(reader, JsonObject::class.java)
 
-                    if (j.get("text") != null && j.getAsJsonObject("user").get("profile_image_url_https") != null && j.getAsJsonObject("user").get("name") != null){
-                        val t = gson.fromJson<Tweet>(j, Tweet::class.java)
+                Log.d("debug", "JSON: " + j.toString())
 
-                        withContext(Dispatchers.Main) {
-                            _status.value = DataApiStatus.DONE
-                            // https://stackoverflow.com/questions/47941537/notify-observer-when-item-is-added-to-list-of-livedata
-                            tweetsList.add(t)
-                            _tweetsList.value = tweetsList
-                            ttlRemoval()
-                        }
+                if (j.get("text") != null && j.getAsJsonObject("user").get("profile_image_url_https") != null && j.getAsJsonObject("user").get("name") != null){
+                    val t = gson.fromJson(j, Tweet::class.java)
+
+                    withContext(Dispatchers.Main) {
+                        _status.value = DataApiStatus.DONE
+                        // https://stackoverflow.com/questions/47941537/notify-observer-when-item-is-added-to-list-of-livedata
+                        tweetsList.add(t)
+                        _tweetsList.value = tweetsList
+                        ttlRemoval()
                     }
                 }
             }
-            catch (e : JsonSyntaxException) {
-                Log.e("error", "JsonSyntaxException ${e.message}");
-            }
-            catch (e: Exception) {
-                Log.e("error", "ERROR ${e.message}")
-                //Commented this in order to preserve RecyclerView data as it is required
-//                withContext(Dispatchers.Main){
-//                    _status.value = DataApiStatus.ERROR
-//                }
-
-            }
+        }
+        catch (e : JsonSyntaxException) {
+            Log.e("error", "JsonSyntaxException ${e.message}");
+        }
+        catch (e: Exception) {
+            Log.e("error", "ERROR ${e.message}")
         }
     }
 
@@ -110,7 +104,9 @@ class OverviewViewModel : ViewModel() {
 
     fun searchStream(str: String) {
         Log.d("debug", "Search parameter to stream - $str")
-        getStreamData(str)
+        coroutineScope.launch {
+            getStreamData(str)
+        }
     }
 
     override fun onCleared() {
@@ -120,13 +116,11 @@ class OverviewViewModel : ViewModel() {
     }
 
     fun isJobRunning() : Boolean{
-        return viewModelJob.isActive
+        return coroutineScope.coroutineContext.isActive
     }
 
     fun cancelJob(){
         Log.d("debug", "Cancelling current Job!")
-        viewModelJob.cancel()
-        viewModelJob = Job()
-        coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Default)
+        coroutineScope.coroutineContext.cancelChildren()
     }
 }
