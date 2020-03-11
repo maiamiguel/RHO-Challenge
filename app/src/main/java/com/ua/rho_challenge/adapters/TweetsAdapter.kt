@@ -6,7 +6,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.ua.rho_challenge.R
 import com.ua.rho_challenge.databinding.TweetViewItemBinding
-import com.ua.rho_challenge.network.Tweet
+import com.ua.rho_challenge.models.Tweet
 
 /**
  * This class implements a [RecyclerView] [ListAdapter] which uses Data Binding to present [List] data

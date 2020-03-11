@@ -10,11 +10,13 @@ import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.snackbar.Snackbar
 import com.ua.rho_challenge.ConnectivityReceiver
 import com.ua.rho_challenge.R
 import com.ua.rho_challenge.databinding.FragmentOverviewBinding
 import com.ua.rho_challenge.viewmodels.OverviewViewModel
 import com.ua.rho_challenge.adapters.TweetsAdapter
+import kotlinx.android.synthetic.main.fragment_overview.*
 
 /**
  * This fragment shows a list of tweets consumed through the Twitter Streaming API.
@@ -24,6 +26,9 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener,
     private var isConnected: Boolean = false
     private lateinit var connectivityReceiver: ConnectivityReceiver
     private lateinit var searchView: SearchView
+
+    private lateinit var mSnackBar: Snackbar
+
 
     /**
      * Lazily initialize [OverviewViewModel].
@@ -60,8 +65,6 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener,
                 t?.let {
                     // Sets new Data to RecyclerView
                     adapter.setTweetsList(it)
-                    // Scrolls down to last position of the list. Gives the UI flow perception
-                    //binding.tweetList.scrollToPosition(t.size - 1)
                 }
             })
 
@@ -76,8 +79,8 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener,
         return binding.root
     }
 
-    override fun onPause() {
-        super.onPause()
+    override fun onDestroy() {
+        super.onDestroy()
         activity?.unregisterReceiver(connectivityReceiver)
     }
 
@@ -131,11 +134,15 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener,
         if (isConnected) {
             Log.d("debug", "Device is connected.");
             this.isConnected = true;
-            displayToast(getString(R.string.connection_yes))
+
+            mSnackBar = Snackbar.make(rootLayout, getString(R.string.connection_yes), Snackbar.LENGTH_LONG) //Assume "rootLayout" as the root layout of every activity.
+            mSnackBar.show()
         } else {
             Log.d("debug", "Device is not Connected");
             this.isConnected = false;
-            displayToast(getString(R.string.no_connection))
+
+            mSnackBar = Snackbar.make(rootLayout, getString(R.string.no_connection), Snackbar.LENGTH_LONG) //Assume "rootLayout" as the root layout of every activity.
+            mSnackBar.show()
             if (viewModel.isJobRunning()){
                 viewModel.cancelJob()
             }

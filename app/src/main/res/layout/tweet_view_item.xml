@@ -9,7 +9,7 @@
 
         <variable
             name="property"
-            type="com.ua.rho_challenge.network.Tweet" />
+            type="com.ua.rho_challenge.models.Tweet" />
     </data>
 
     <LinearLayout

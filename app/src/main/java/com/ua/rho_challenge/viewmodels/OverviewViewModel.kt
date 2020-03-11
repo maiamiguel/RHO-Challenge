@@ -9,8 +9,8 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.JsonSyntaxException
 import com.google.gson.stream.JsonReader
-import com.ua.rho_challenge.network.Tweet
-import com.ua.rho_challenge.network.User
+import com.ua.rho_challenge.models.Tweet
+import com.ua.rho_challenge.models.User
 import com.ua.rho_challenge.network.expiring_time
 import com.ua.rho_challenge.network.network.ApiService
 import kotlinx.coroutines.*
@@ -62,7 +62,7 @@ class OverviewViewModel : ViewModel() {
                 val gson = GsonBuilder().create()
                 val j = gson.fromJson<JsonObject>(reader, JsonObject::class.java)
 
-                Log.d("debug", "JSON: " + j.toString())
+                Log.d("debug", "JSON: $j")
 
                 if (j.get("text") != null && j.getAsJsonObject("user").get("profile_image_url_https") != null && j.getAsJsonObject("user").get("name") != null){
                     val t = gson.fromJson(j, Tweet::class.java)
@@ -87,7 +87,17 @@ class OverviewViewModel : ViewModel() {
 
     // Just for testing
     fun insertNewTweet(){
-        tweetsList.add(Tweet("teste", "teste", "teste", User("https://firebasestorage.googleapis.com/v0/b/spicadiary-32494.appspot.com/o/TOUTBd65z4gSkEvaxJkPLL3H6782%2F12-12-2019%2000-20-27%2FPhotos%2F12-12-2019%2000-20-27_0.jpg?alt=media&token=234c5832-a6b2-499c-83df-fc9875621ffe","teste")))
+        tweetsList.add(
+            Tweet(
+                "teste",
+                "teste",
+                "teste",
+                User(
+                    "https://firebasestorage.googleapis.com/v0/b/spicadiary-32494.appspot.com/o/TOUTBd65z4gSkEvaxJkPLL3H6782%2F12-12-2019%2000-20-27%2FPhotos%2F12-12-2019%2000-20-27_0.jpg?alt=media&token=234c5832-a6b2-499c-83df-fc9875621ffe",
+                    "teste"
+                )
+            )
+        )
         _tweetsList.value = tweetsList
     }
 

@@ -10,10 +10,10 @@
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/rootLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.MainActivity"   >
+        tools:context=".ui.MainActivity"
+        android:id="@+id/rootLayout"    >
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/tweetList"

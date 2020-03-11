@@ -5,9 +5,11 @@ import com.ua.rho_challenge.network.access_token
 import com.ua.rho_challenge.network.access_token_secret
 import com.ua.rho_challenge.network.consumer_key
 import com.ua.rho_challenge.network.consumer_secret
+import io.reactivex.Observable
 import kotlinx.coroutines.Deferred
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.POST
 import retrofit2.http.Query
@@ -36,6 +38,7 @@ class ApiService() {
         val retrofit = retrofit2.Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
+            //.addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .addCallAdapterFactory(CoroutineCallAdapterFactory())
             .client(client)
             .build()
@@ -55,5 +58,5 @@ interface TwitterStreamingApi {
     @POST("statuses/filter.json")
     fun getTweetList(
         @Query("track") terms: String?
-    ): Deferred<ResponseBody>//Observable<ResponseBody>
+    ): Deferred<ResponseBody>
 }

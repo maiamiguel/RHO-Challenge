@@ -5,7 +5,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.Observer
-import com.ua.rho_challenge.network.Tweet
+import com.ua.rho_challenge.models.Tweet
 import com.ua.rho_challenge.network.network.ApiService
 import com.ua.rho_challenge.viewmodels.DataApiStatus
 import com.ua.rho_challenge.viewmodels.OverviewViewModel

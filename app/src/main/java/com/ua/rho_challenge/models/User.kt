@@ -1,4 +1,4 @@
-package com.ua.rho_challenge.network
+package com.ua.rho_challenge.models
 
 import com.google.gson.annotations.SerializedName
 
