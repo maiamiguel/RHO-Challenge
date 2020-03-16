@@ -1,4 +1,4 @@
-package com.ua.rho_challenge
+package com.ua.rho_challenge.utils
 
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
@@ -24,8 +24,7 @@ class ConnectivityReceiver : BroadcastReceiver() {
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val networkCapabilities = connectivityManager.activeNetwork ?: return false
-            val actNw =
-                connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
+            val actNw = connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
             result = when {
                 actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
                 actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true

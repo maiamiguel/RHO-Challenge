@@ -10,11 +10,11 @@ android {
         enabled = true
         enabledForTests = true
     }
-    buildToolsVersion "28.0.2"
+    buildToolsVersion "29.0.3"
     defaultConfig {
         applicationId "com.ua.rho_challenge"
         minSdkVersion 23
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -51,13 +51,6 @@ dependencies {
 
     // Core with Ktx
     implementation "androidx.core:core-ktx:$version_core"
-
-    // Coroutines
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_kotlin_coroutines"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_kotlin_coroutines"
-
-    // Retrofit Coroutines Support
-    implementation "com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:$version_retrofit_coroutines_adapter"
 
     // Glide
     implementation "com.github.bumptech.glide:glide:$version_glide"
@@ -107,10 +100,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     testImplementation "org.mockito:mockito-core:2.27.0"
 
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.0-alpha01"
-
-    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.6.0'
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.6'
-    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+    // Saved state module for ViewModel
+    implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:1.0.0-alpha01"
 
 }

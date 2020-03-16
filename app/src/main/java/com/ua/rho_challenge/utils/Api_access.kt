@@ -1,4 +1,4 @@
-package com.ua.rho_challenge.network
+package com.ua.rho_challenge.utils
 
 const val consumer_key = "LEC0WAN1NQLRGwimAkpLJm9AV"
 const val consumer_secret = "LjNd68pV154kwj5uvHcYehFEJgmwdcqiamhT9MGSImT67yDP4s"

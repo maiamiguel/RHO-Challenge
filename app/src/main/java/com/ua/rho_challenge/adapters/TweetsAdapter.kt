@@ -4,16 +4,17 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.ua.rho_challenge.utils.TTLList
 import com.ua.rho_challenge.R
 import com.ua.rho_challenge.databinding.TweetViewItemBinding
 import com.ua.rho_challenge.models.Tweet
 
 /**
- * This class implements a [RecyclerView] [ListAdapter] which uses Data Binding to present [List] data
+ * This class implements a [RecyclerView] which uses Data Binding to present [List] data
  */
 class TweetsAdapter : RecyclerView.Adapter<TweetsAdapter.TweetViewHolder?>() {
 
-    private var tweets: ArrayList<Tweet> = ArrayList()
+    private var tweets: TTLList<Tweet> = TTLList()
 
     override fun onCreateViewHolder(
         viewGroup: ViewGroup,
@@ -30,7 +31,7 @@ class TweetsAdapter : RecyclerView.Adapter<TweetsAdapter.TweetViewHolder?>() {
         tweetViewHolder: TweetViewHolder,
         i: Int
     ) {
-        val currentTweet: Tweet = tweets.get(i)
+        val currentTweet: Tweet = tweets[i]
         tweetViewHolder.tweetsListItemBinding.property = currentTweet
     }
 
@@ -38,12 +39,12 @@ class TweetsAdapter : RecyclerView.Adapter<TweetsAdapter.TweetViewHolder?>() {
         return if (tweets.isEmpty()) 0 else tweets.size
     }
 
-    fun setTweetsList(tweets: ArrayList<Tweet>) {
+    fun setTweetsList(tweets: TTLList<Tweet>) {
         this.tweets = tweets
         notifyDataSetChanged()
     }
 
-    inner class TweetViewHolder(tweetListItemBinding: TweetViewItemBinding) : RecyclerView.ViewHolder(tweetListItemBinding.getRoot()) {
+    inner class TweetViewHolder(tweetListItemBinding: TweetViewItemBinding) : RecyclerView.ViewHolder(tweetListItemBinding.root) {
         internal val tweetsListItemBinding: TweetViewItemBinding = tweetListItemBinding
     }
 }

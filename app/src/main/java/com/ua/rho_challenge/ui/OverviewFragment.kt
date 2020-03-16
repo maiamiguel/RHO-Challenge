@@ -9,33 +9,29 @@ import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.lifecycle.SavedStateViewModelFactory
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
-import com.ua.rho_challenge.ConnectivityReceiver
+import com.ua.rho_challenge.utils.ConnectivityReceiver
 import com.ua.rho_challenge.R
-import com.ua.rho_challenge.databinding.FragmentOverviewBinding
 import com.ua.rho_challenge.viewmodels.OverviewViewModel
 import com.ua.rho_challenge.adapters.TweetsAdapter
+import com.ua.rho_challenge.databinding.FragmentOverviewBinding
 import kotlinx.android.synthetic.main.fragment_overview.*
 
 /**
  * This fragment shows a list of tweets consumed through the Twitter Streaming API.
  */
-class OverviewFragment : Fragment(), SearchView.OnQueryTextListener,
-    ConnectivityReceiver.ConnectivityReceiverListener {
+class OverviewFragment : Fragment(), SearchView.OnQueryTextListener, ConnectivityReceiver.ConnectivityReceiverListener {
     private var isConnected: Boolean = false
     private lateinit var connectivityReceiver: ConnectivityReceiver
     private lateinit var searchView: SearchView
-
     private lateinit var mSnackBar: Snackbar
-
 
     /**
      * Lazily initialize [OverviewViewModel].
      */
-    private val viewModel: OverviewViewModel by lazy {
-        ViewModelProvider(this).get(OverviewViewModel::class.java)
-    }
+    lateinit var viewModel: OverviewViewModel;
 
     /**
      * Inflates the layout with Data Binding, sets its lifecycle owner to the OverviewFragment
@@ -46,6 +42,8 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        viewModel = ViewModelProvider(this, SavedStateViewModelFactory(requireActivity().application, this)).get(OverviewViewModel::class.java)
+
         val binding = FragmentOverviewBinding.inflate(inflater)
 
         // Allows Data Binding to Observe LiveData with the lifecycle of this Fragment
@@ -101,18 +99,22 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener,
      * Listens to search text submission and passes it to viewModel to initiate the search
      */
     override fun onQueryTextSubmit(query: String?): Boolean {
-        if ((!query.isNullOrBlank() or !query.isNullOrEmpty()) and isConnected) {
-            searchView.clearFocus();
-            displayToast(getString(R.string.start_search))
+        if ((!query.isNullOrBlank() or !query.isNullOrEmpty())) {
+            if (isConnected) {
+                searchView.clearFocus();
+                displayToast(getString(R.string.start_search))
 
-            query?.let { viewModel.searchStream(it) }
-            return true
+                query?.let { viewModel.searchStream(it) }
+                return true
+            } else {
+                displayToast(getString(R.string.no_connection))
+            }
         }
         return false
     }
 
     override fun onQueryTextChange(newText: String?): Boolean {
-        if (viewModel.isJobRunning()){
+        if (viewModel.isJobRunning()) {
             viewModel.cancelJob()
         }
         return false
@@ -135,15 +137,16 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener,
             Log.d("debug", "Device is connected.");
             this.isConnected = true;
 
-            mSnackBar = Snackbar.make(rootLayout, getString(R.string.connection_yes), Snackbar.LENGTH_LONG) //Assume "rootLayout" as the root layout of every activity.
+            mSnackBar = Snackbar.make(rootLayout, getString(R.string.connection_yes), Snackbar.LENGTH_LONG)
             mSnackBar.show()
         } else {
             Log.d("debug", "Device is not Connected");
             this.isConnected = false;
 
-            mSnackBar = Snackbar.make(rootLayout, getString(R.string.no_connection), Snackbar.LENGTH_LONG) //Assume "rootLayout" as the root layout of every activity.
+            mSnackBar = Snackbar.make(rootLayout, getString(R.string.no_connection), Snackbar.LENGTH_LONG)
             mSnackBar.show()
-            if (viewModel.isJobRunning()){
+
+            if (viewModel.isJobRunning()) {
                 viewModel.cancelJob()
             }
         }

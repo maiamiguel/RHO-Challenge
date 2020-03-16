@@ -25,7 +25,7 @@
 
         <!-- The below code is for android OS version below N -->
         <receiver
-            android:name=".ConnectivityReceiver"
+            android:name=".utils.ConnectivityReceiver"
             android:enabled="true">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
