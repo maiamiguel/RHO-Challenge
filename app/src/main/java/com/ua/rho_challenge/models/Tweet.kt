@@ -1,11 +1,17 @@
 package com.ua.rho_challenge.models
 
+import androidx.room.ColumnInfo
+import androidx.room.Embedded
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 
 /**
  * Class regarding tweet data
  */
+@Entity(tableName = "tweet_table")
 class Tweet(
+    @PrimaryKey @ColumnInfo(name = "createdAt")
     @SerializedName("created_at")
     val createdAt: String,
     @SerializedName("id_str")
@@ -13,7 +19,7 @@ class Tweet(
     @SerializedName("text")
     val text: String,
     @SerializedName("user")
-    val user: User
+    @Embedded val user: User
 ){
 
 }

@@ -1,8 +1,12 @@
 package com.ua.rho_challenge.utils
 
+import com.ua.rho_challenge.network.expiring_time
 import java.util.*
+import kotlin.collections.ArrayList
 
-class TTLList<K>() : MutableList<K> {
+//https://gist.github.com/pcan/16faf4e59942678377e0
+//https://gist.github.com/joelittlejohn/5565410
+class TTLList<K>() : ArrayList<K>() {
     private val tweetsList: MutableList<K>
     private val timestamps: MutableMap<K, Long>
 

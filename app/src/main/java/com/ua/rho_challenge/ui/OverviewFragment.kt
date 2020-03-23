@@ -9,29 +9,32 @@ import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.SavedStateViewModelFactory
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
-import com.ua.rho_challenge.utils.ConnectivityReceiver
+import com.ua.rho_challenge.network.ConnectivityReceiver
 import com.ua.rho_challenge.R
 import com.ua.rho_challenge.viewmodels.OverviewViewModel
 import com.ua.rho_challenge.adapters.TweetsAdapter
 import com.ua.rho_challenge.databinding.FragmentOverviewBinding
+import com.ua.rho_challenge.models.Tweet
+import com.ua.rho_challenge.utils.TTLList
 import kotlinx.android.synthetic.main.fragment_overview.*
 
 /**
  * This fragment shows a list of tweets consumed through the Twitter Streaming API.
  */
-class OverviewFragment : Fragment(), SearchView.OnQueryTextListener, ConnectivityReceiver.ConnectivityReceiverListener {
+class OverviewFragment : Fragment(), SearchView.OnQueryTextListener,
+    ConnectivityReceiver.ConnectivityReceiverListener {
     private var isConnected: Boolean = false
     private lateinit var connectivityReceiver: ConnectivityReceiver
     private lateinit var searchView: SearchView
     private lateinit var mSnackBar: Snackbar
+    private lateinit var searchQuery : String
 
     /**
      * Lazily initialize [OverviewViewModel].
      */
-    lateinit var viewModel: OverviewViewModel;
+    private lateinit var viewModel: OverviewViewModel
 
     /**
      * Inflates the layout with Data Binding, sets its lifecycle owner to the OverviewFragment
@@ -42,7 +45,9 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener, Connectivit
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        viewModel = ViewModelProvider(this, SavedStateViewModelFactory(requireActivity().application, this)).get(OverviewViewModel::class.java)
+        viewModel = ViewModelProvider(
+            this
+        ).get(OverviewViewModel::class.java)
 
         val binding = FragmentOverviewBinding.inflate(inflater)
 
@@ -60,13 +65,27 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener, Connectivit
         viewModel.properties.observe(
             this.viewLifecycleOwner,
             Observer { t ->
-                t?.let {
+                t.let {
                     // Sets new Data to RecyclerView
+                    Log.d("debug", "setTweetsList changed")
                     adapter.setTweetsList(it)
                 }
             })
 
-        connectivityReceiver = ConnectivityReceiver()
+        viewModel.tweetsDB.observe(
+            this.viewLifecycleOwner,
+            Observer { t ->
+                t.let {
+                    // Sets new Data to RecyclerView from Room DB
+                    Log.d("debug", "DB CHANGED DATA")
+                    if (!isConnected) {
+                        adapter.setTweetsList(it)
+                    }
+                }
+            })
+
+        connectivityReceiver =
+            ConnectivityReceiver()
 
         activity?.registerReceiver(
             connectivityReceiver,
@@ -82,6 +101,22 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener, Connectivit
         activity?.unregisterReceiver(connectivityReceiver)
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        Log.d("debug", "onSaveInstanceState - $searchQuery")
+        outState.putString("searchQuery", searchQuery)
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        Log.d("debug", "onActivityCreated")
+
+        searchQuery = savedInstanceState?.getString("searchQuery").toString()
+
+        Log.d("debug", "onActivityCreated Bundle - $searchQuery")
+
+        super.onActivityCreated(savedInstanceState)
+    }
+
     /**
      * Inflates the search menu
      */
@@ -91,6 +126,19 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener, Connectivit
         val searchItem = menu.findItem(R.id.action_search)
         searchView = searchItem.actionView as SearchView
         searchView.setOnQueryTextListener(this)
+
+        if (!isConnected && searchQuery != "null"){
+            searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+                override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+                    // it is important to call this before we set our own query text.
+                    searchView.onActionViewExpanded()
+                    searchView.setQuery(searchQuery, false)
+                    return true
+                }
+
+                override fun onMenuItemActionCollapse(item: MenuItem?) = true
+            })
+        }
 
         super.onCreateOptionsMenu(menu, inflater)
     }
@@ -104,7 +152,10 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener, Connectivit
                 searchView.clearFocus();
                 displayToast(getString(R.string.start_search))
 
-                query?.let { viewModel.searchStream(it) }
+                query?.let {
+                    searchQuery = it
+                    viewModel.searchStream(it)
+                }
                 return true
             } else {
                 displayToast(getString(R.string.no_connection))
@@ -116,6 +167,7 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener, Connectivit
     override fun onQueryTextChange(newText: String?): Boolean {
         if (viewModel.isJobRunning()) {
             viewModel.cancelJob()
+            displayToast(getString(R.string.stop_stream))
         }
         return false
     }
@@ -133,17 +185,20 @@ class OverviewFragment : Fragment(), SearchView.OnQueryTextListener, Connectivit
     }
 
     override fun onNetworkConnectionChanged(isConnected: Boolean) {
+        Log.d("debug", "onNetworkConnectionChanged")
         if (isConnected) {
             Log.d("debug", "Device is connected.");
             this.isConnected = true;
 
-            mSnackBar = Snackbar.make(rootLayout, getString(R.string.connection_yes), Snackbar.LENGTH_LONG)
+            mSnackBar =
+                Snackbar.make(rootLayout, getString(R.string.connection_yes), Snackbar.LENGTH_LONG)
             mSnackBar.show()
         } else {
             Log.d("debug", "Device is not Connected");
             this.isConnected = false;
 
-            mSnackBar = Snackbar.make(rootLayout, getString(R.string.no_connection), Snackbar.LENGTH_LONG)
+            mSnackBar =
+                Snackbar.make(rootLayout, getString(R.string.no_connection), Snackbar.LENGTH_LONG)
             mSnackBar.show()
 
             if (viewModel.isJobRunning()) {

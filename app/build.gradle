@@ -92,7 +92,7 @@ dependencies {
 
     // AndroidX Test - Instrumented testing
     androidTestImplementation "androidx.test.ext:junit:1.1.1"
-    androidTestImplementation "androidx.test.espresso:espresso-core:3.3.0-alpha04"
+    androidTestImplementation "androidx.test.espresso:espresso-core:3.3.0-alpha05"
 
     kapt 'com.android.databinding:compiler:3.1.4'
     testImplementation 'org.robolectric:robolectric:4.3.1'
@@ -101,6 +101,23 @@ dependencies {
     testImplementation "org.mockito:mockito-core:2.27.0"
 
     // Saved state module for ViewModel
-    implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:1.0.0-alpha01"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:2.3.0-alpha01"
 
+    //Coroutine Scope
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.0-alpha01"
+
+    implementation "androidx.room:room-runtime:$room_version"
+    kapt "androidx.room:room-compiler:$room_version" // For Kotlin use kapt instead of annotationProcessor
+
+    // optional - Kotlin Extensions and Coroutines support for Room
+    implementation "androidx.room:room-ktx:$room_version"
+
+    // optional - RxJava support for Room
+    implementation "androidx.room:room-rxjava2:$room_version"
+
+    // optional - Guava support for Room, including Optional and ListenableFuture
+    implementation "androidx.room:room-guava:$room_version"
+
+    // Test helpers
+    testImplementation "androidx.room:room-testing:$room_version"
 }

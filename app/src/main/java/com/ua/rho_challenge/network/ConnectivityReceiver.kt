@@ -1,4 +1,4 @@
-package com.ua.rho_challenge.utils
+package com.ua.rho_challenge.network
 
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver

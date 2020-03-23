@@ -13,8 +13,7 @@ import com.ua.rho_challenge.models.Tweet
  * This class implements a [RecyclerView] which uses Data Binding to present [List] data
  */
 class TweetsAdapter : RecyclerView.Adapter<TweetsAdapter.TweetViewHolder?>() {
-
-    private var tweets: TTLList<Tweet> = TTLList()
+    private var tweets: List<Tweet> = TTLList()
 
     override fun onCreateViewHolder(
         viewGroup: ViewGroup,
@@ -39,7 +38,7 @@ class TweetsAdapter : RecyclerView.Adapter<TweetsAdapter.TweetViewHolder?>() {
         return if (tweets.isEmpty()) 0 else tweets.size
     }
 
-    fun setTweetsList(tweets: TTLList<Tweet>) {
+    fun setTweetsList(tweets: List<Tweet>) {
         this.tweets = tweets
         notifyDataSetChanged()
     }

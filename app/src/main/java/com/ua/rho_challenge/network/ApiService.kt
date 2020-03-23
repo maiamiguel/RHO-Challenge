@@ -1,9 +1,9 @@
 package com.ua.rho_challenge.network.network
 
-import com.ua.rho_challenge.utils.access_token
-import com.ua.rho_challenge.utils.access_token_secret
-import com.ua.rho_challenge.utils.consumer_key
-import com.ua.rho_challenge.utils.consumer_secret
+import com.ua.rho_challenge.network.access_token
+import com.ua.rho_challenge.network.access_token_secret
+import com.ua.rho_challenge.network.consumer_key
+import com.ua.rho_challenge.network.consumer_secret
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import retrofit2.Call
