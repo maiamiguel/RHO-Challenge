@@ -48,33 +48,11 @@ class OverviewViewModel(application: Application) : AndroidViewModel(application
     private var currentCall: Call<ResponseBody>? = null
 
 
-
-    // Keep the key as a constant
-    companion object {
-        private const val USER_KEY = "search"
-    }
-
     private val tweetsDao: TweetDao = AppDatabase.getDatabase(application).tweetDao()
     val tweetsDB : LiveData<List<Tweet>> = tweetsDao.getTweets()
 
     init {
         Log.d("debug", "SIZE ${tweetsDB.value?.size.toString()}")
-    }
-
-    // Just for testing
-    fun insertNewTweet() {
-        tweetsList.add(
-            Tweet(
-                "teste",
-                "teste",
-                "teste",
-                User(
-                    "https://firebasestorage.googleapis.com/v0/b/spicadiary-32494.appspot.com/o/TOUTBd65z4gSkEvaxJkPLL3H6782%2F12-12-2019%2000-20-27%2FPhotos%2F12-12-2019%2000-20-27_0.jpg?alt=media&token=234c5832-a6b2-499c-83df-fc9875621ffe",
-                    "teste"
-                )
-            )
-        )
-        _tweetsList.value = tweetsList
     }
 
     fun searchStream(str: String) {
